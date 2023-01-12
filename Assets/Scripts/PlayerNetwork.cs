@@ -4,7 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerNetwork : NetworkBehaviour
-{
+{ 
     public struct Card : INetworkSerializable
     {
         public int color;
@@ -34,6 +34,7 @@ public class PlayerNetwork : NetworkBehaviour
             test.Value = new Card { color = 1, value = 7 };
             TestServerRPC();
         }
+        StartGameServerRPC();
     }
 
     public override void OnNetworkSpawn()
@@ -42,6 +43,7 @@ public class PlayerNetwork : NetworkBehaviour
         {
             Debug.Log(OwnerClientId + "; color " + newVal.color + "value "+ newVal.value);
         };
+        
     }
 
     [ServerRpc]
@@ -51,9 +53,27 @@ public class PlayerNetwork : NetworkBehaviour
     }
 
 
+    //[ServerRpc]
+    //private void TestServerParamsRPC(ServerRpcParams serverRpcParams)
+    //{
+    //    Debug.Log("ServerRPC from " + OwnerClientId + "; " + serverRpcParams.Receive.SenderClientId);
+    //}
+
+    //static void Test()
+    //{
+    //    if (NetworkManager.Singleton.Is)
+    //}
+
+
+
     [ServerRpc]
-    private void TestServerParamsRPC(ServerRpcParams serverRpcParams)
+    private void StartGameServerRPC()
     {
-        Debug.Log("ServerRPC from " + OwnerClientId + "; " + serverRpcParams.Receive.ToString());
+        Debug.Log("StartGame called");
+        if (IsServer && NetworkManager.Singleton.ConnectedClientsIds.Count > 0)
+        {
+            Debug.Log("StartGame condition met");
+            //GamelogicServer gl = new GamelogicServer();
+        }
     }
 }

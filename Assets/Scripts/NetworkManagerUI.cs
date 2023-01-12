@@ -9,9 +9,11 @@ public class NetworkManagerUI : MonoBehaviour
     [SerializeField] private Button serverBtn;
     [SerializeField] private Button hostBtn;
     [SerializeField] private Button clientBtn;
+    [SerializeField] private Button startBtn;
 
     private void Awake()
     {
+        GameLogicServer gn = new GameLogicServer();
         serverBtn.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartServer();
@@ -23,6 +25,13 @@ public class NetworkManagerUI : MonoBehaviour
         clientBtn.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartClient();
+        });
+        startBtn.onClick.AddListener(() =>
+        {
+            if (NetworkManager.Singleton.ConnectedClientsList.Count >= 0)
+            {
+               
+            }
         });
     }
 }
