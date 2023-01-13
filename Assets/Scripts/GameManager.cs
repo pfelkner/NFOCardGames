@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     // config
     public static GameManager gM;
@@ -38,6 +40,9 @@ public class GameManager : MonoBehaviour
 
     public List<Card> playedCardList = new List<Card>();
     public List<Card> lastCardPlayed = new List<Card>();
+
+
+    public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private void Awake()
     {
@@ -141,6 +146,11 @@ public class GameManager : MonoBehaviour
             lastCardPlayed.Clear();
             lastCardPlayed.Add(playedCardList[0]);
         }
+    }
+
+    public void SetValueOfLastCard(int value)
+    {
+        lastCardPlayedValue.Value = value;
     }
 
 

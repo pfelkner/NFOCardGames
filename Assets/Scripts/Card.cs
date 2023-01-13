@@ -15,9 +15,8 @@ public class Card : MonoBehaviour
 
     private void OnMouseDown()
     {
-        GameManager.gM.currentPlayer = cardOwner;
-        GameManager.gM.lastCardPlayed.Clear();
-        GameManager.gM.lastCardPlayed.Add(this);
+        cardOwner.SetLastCardValue((int)value);
+        
         transform.position = new Vector2(0, 1f);
        
  

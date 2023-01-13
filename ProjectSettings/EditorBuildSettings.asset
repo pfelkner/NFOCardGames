@@ -6,9 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
+    path: Assets/Scenes/Arschloch.unity
+    guid: 0e58d77ab81e1ea4286e8af2e3c2a15b
+  - enabled: 0
     path: Assets/Scenes/NFOTestScene.unity
     guid: b7781cc7671334604888c7468b82f7ad
   m_configObjects: {}

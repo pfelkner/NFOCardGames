@@ -619,61 +619,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 927077815}
   m_CullTransparentMesh: 1
---- !u!1 &1283811465
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1283811467}
-  - component: {fileID: 1283811466}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1283811466
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283811465}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31420e1e7c99b4b42bc0eb91bb5afdbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardEmptyPrefab: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
-  deckGO: {fileID: 1365048595}
-  players: []
-  colorsAvaliable: 00000000010000000200000003000000
-  valuesAvaliable: 010000000200000003000000040000000500000006000000070000000800000009000000
-  maximumCardsInHand: 9
-  createdCardsList: []
-  playedCardList:
-  - {fileID: 467836037}
-  lastCardPlayed:
-  - {fileID: 467836037}
---- !u!4 &1283811467
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283811465}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.42, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1365048595
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,6 +716,16 @@ MonoBehaviour:
     NetworkPrefabs:
     - Override: 0
       Prefab: {fileID: 6029599228192068347, guid: 658c9ff00e110c7438564c7e650a9bf9, type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
+    - Override: 0
+      Prefab: {fileID: 8714726494607108090, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
+    - Override: 0
+      Prefab: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
       SourcePrefabToOverride: {fileID: 0}
       SourceHashToOverride: 0
       OverridingTargetPrefab: {fileID: 0}
@@ -1328,3 +1283,76 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &8714726495873437555
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -12.42
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108088, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: deckGO
+      value: 
+      objectReference: {fileID: 1365048595}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: lastCardPlayed.Array.data[0]
+      value: 
+      objectReference: {fileID: 467836037}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: playedCardList.Array.data[0]
+      value: 
+      objectReference: {fileID: 467836037}
+    - target: {fileID: 8714726494607108090, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: m_Name
+      value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108095, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3014824477
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 99aeda4bb420410418f078a55572a17a, type: 3}

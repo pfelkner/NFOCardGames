@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.Netcode;
 using UnityEditor;
 using UnityEngine;
 
-public class PlayerOwn : MonoBehaviour
+public class PlayerOwn : NetworkBehaviour
 {
     public List<Card> cardsInHand;
-
 
     private void OnEnable()
     {
@@ -28,7 +28,14 @@ public class PlayerOwn : MonoBehaviour
         }
       
     }
+    
+    public void SetLastCardValue(int valueChange)
+    {
+        if (IsOwner)
+        {
 
+        }
+    }
     public List<Card> PlayerMove(Card topCard, int reps)
     {
         // returns list of played cards | emptyList = "pass"
@@ -100,4 +107,25 @@ public class PlayerOwn : MonoBehaviour
            _gM.lastCardPlayed.Add(item);
         }
     }
+
+    public void ChangeLastPlayed(int value)
+    {
+        if (NetworkManager.Singleton.IsServer)
+        {
+            // server
+            GameManager.gM.lastCardPlayedValue.Value = value;
+        }
+        else
+        {
+            // client
+            SubmitLastCardValueServerRPC();
+        }
+    }
+
+    [ServerRpc]
+    public void SubmitLastCardValueServerRPC()
+    {
+       // GameManager.gM.lastCardPlayedValue.Value = 
+    }
+
 }
