@@ -2,16 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Card
+public class Card : MonoBehaviour
 {
-
     public Colors color;
     public Values value;
 
-    public Card(Colors col, Values val)
+
+   
+    public PlayerOwn cardOwner;
+
+
+
+    private void OnMouseDown()
     {
-        color = col;
-        value = val;
+        GameManager.gM.currentPlayer = cardOwner;
+        GameManager.gM.lastCardPlayed.Clear();
+        GameManager.gM.lastCardPlayed.Add(this);
+        transform.position = new Vector2(0, 1f);
+       
+ 
+    }
+    public void SetCard( Colors newCol, Values newVal)
+    {
+        this.color = newCol;
+        this.value = newVal;
+    }
+
+    public void SetPatent(PlayerOwn player, Transform parent)
+    {
+        this.transform.transform.parent = parent;
+        cardOwner = player;
     }
 
 }
@@ -26,6 +46,7 @@ public enum Colors
 }
 public enum Values
 {
+    fünf,
     sechs,
     sieben,
     acht,
