@@ -18,6 +18,9 @@ public class Card : MonoBehaviour
         cardOwner.SetLastCardValue((int)value);
         
         transform.position = new Vector2(0, 1f);
+
+        cardOwner.DropCard(this);
+        //Destroy(this);
        
  
     }
@@ -45,7 +48,7 @@ public enum Colors
 }
 public enum Values
 {
-    fünf,
+    fuenf,
     sechs,
     sieben,
     acht,

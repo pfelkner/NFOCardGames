@@ -9,33 +9,63 @@ using UnityEngine;
 public class PlayerOwn : NetworkBehaviour
 {
     public List<Card> cardsInHand;
+    private List<int> cardValues = new List<int>();
 
     private void OnEnable()
     {
         GameManager.gM.players.Add(this);
     }
 
+    [ClientRpc]
+    public void UpdatePlayersClientRpc(int card)
+    {
+        //this.players = players;
+        Debug.Log(card);
+        cardValues.Add(card);
+
+    }
+
 
     public void SetPlayer(List<Card> list)
     {
-        cardsInHand = list;
+        //cardsInHand = list;
+        List<Card> tmp = new List<Card>();
         float spacing = 0;
         foreach(Card card in list)
         {
             GameObject created = Instantiate(card.gameObject,new Vector2(-3+spacing,-3),Quaternion.identity);
             created.GetComponent<Card>().SetPatent(this, this.transform);
             spacing++;
+            tmp.Add(created.GetComponent<Card>());
         }
-      
+        cardsInHand = tmp;
     }
     
     public void SetLastCardValue(int valueChange)
     {
-        if (IsOwner)
+        if (IsOwner && !IsServer)
         {
-
+            UpdateLatestPlayedServerRpc(valueChange);
+        } else if (IsOwner && IsServer)
+        {
+            GameManager.gM.lastCardPlayedValue.Value = valueChange;
         }
     }
+
+    [ServerRpc]
+    private void UpdateLatestPlayedServerRpc(int valueChange)
+    {
+        GameManager.gM.lastCardPlayedValue.Value = valueChange;
+        UpdateLatestPlayedClientRpc(valueChange);
+    }
+
+    [ClientRpc]
+    private void UpdateLatestPlayedClientRpc(int valueChange)
+    {
+        GameManager.gM.lastCardPlayedValue.Value = valueChange;
+    }
+
+
     public List<Card> PlayerMove(Card topCard, int reps)
     {
         // returns list of played cards | emptyList = "pass"
@@ -126,6 +156,25 @@ public class PlayerOwn : NetworkBehaviour
     public void SubmitLastCardValueServerRPC()
     {
        // GameManager.gM.lastCardPlayedValue.Value = 
+    }
+
+    public void DropCard(Card card)
+    {
+        Debug.Log("Destroying card");
+        cardsInHand.Remove(card);
+        GameManager.gM.createdCardsList.Add(card);
+        Destroy(card.gameObject);
+    }
+
+    [ClientRpc]
+    public void CreateCardsInHandClientRpc()
+    {
+        cardsInHand.Clear();
+        foreach(int c in cardValues)
+        {
+            Card newCard = GameManager.gM.CreateCardClient(0, c);
+            cardsInHand.Add(newCard);
+        }
     }
 
 }

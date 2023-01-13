@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Netcode;
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEditor;
@@ -28,14 +29,8 @@ public class GameManager : NetworkBehaviour
     [Header("Rules")]
     public int maximumCardsInHand;
 
-    [HideInInspector]
+    //[HideInInspector]
     public List<Card> createdCardsList = new List<Card>();
-
-    // controls
-    private List<Card> playerOneList = new List<Card>();
-    private List<Card> playerTwoList = new List<Card>();
-    private List<Card> playerThreeList = new List<Card>();
-    private List<Card> playerFourList = new List<Card>();
 
 
     public List<Card> playedCardList = new List<Card>();
@@ -43,6 +38,7 @@ public class GameManager : NetworkBehaviour
 
 
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private void Awake()
     {
@@ -55,30 +51,19 @@ public class GameManager : NetworkBehaviour
         CreateDeck();
         ShuffleDeck();
 
-        // arschloch 
-        DealCards();
-
-        // sync
-       
     }
 
     private void Update()
     {
         // testing
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T) && IsServer)
         {
-            foreach (var item in players)
-            {
-                AddHandToPlayer(item, playerOneList);
-            }
+            DealCards();
         }
-    
     }
 
     private void CreateDeck()
     {
-        var test = Enum.GetValues(typeof(Colors));
-
         for (int i = 0; i < colorsAvaliable.Count ; i++)
         {
             for (int j = 0; j < valuesAvaliable.Count ; j++)
@@ -102,6 +87,20 @@ public class GameManager : NetworkBehaviour
         createdCardsList.Add(card);
     }
 
+    public Card CreateCardClient(int i, int j)
+    {
+        Colors newColor = colorsAvaliable[i];
+        Values newVal = valuesAvaliable[j];
+
+        GameObject gO = Instantiate(cardEmptyPrefab, transform.position, Quaternion.identity);
+        gO.name = newVal + " of " + newColor;
+        gO.transform.SetParent(deckGO.transform);
+        Card card = gO.GetComponent<Card>();
+        card.SetCard(newColor, newVal);
+
+        return card;
+    }
+
     private void ShuffleDeck()
     {
         for (int i = 0; i < createdCardsList.Count; i++)
@@ -115,45 +114,104 @@ public class GameManager : NetworkBehaviour
 
     private void DealCards()
     {
-        // Intervall 0-9 P1, 10-18 P2, ... for all cards
-        for (int i = 0; i < createdCardsList.Count; i++)
+
+
+        if (IsOwner && !IsServer)
         {
-            if (i >= 0 && i < maximumCardsInHand)
-                playerOneList.Add(createdCardsList[i]);
-            
-            else if( i >= maximumCardsInHand && i < maximumCardsInHand*2)
-                playerTwoList.Add(createdCardsList[i]);
-           
-            else if (i >= maximumCardsInHand*2 && i < maximumCardsInHand * 3)
-                playerThreeList.Add(createdCardsList[i]);
-           
-            else if (i >= maximumCardsInHand*3 && i < maximumCardsInHand * 4)
-                playerFourList.Add(createdCardsList[i]);
+            DealcardsServerRpc();
         }
-    }
-
-    private void AddHandToPlayer(PlayerOwn player, List<Card> cards)
-    {
-        player.SetPlayer(cards);
-    }
-
-
-
-    private void CheckForAce()
-    {
-        if ((int)lastCardPlayed[0].value ==(int)Values.ass)
+        else if (IsOwner && IsServer)
         {
-            lastCardPlayed.Clear();
-            lastCardPlayed.Add(playedCardList[0]);
+            foreach (PlayerOwn player in players)
+            {
+                while (player.cardsInHand.Count < maximumCardsInHand)
+                {
+                    Debug.Log(player.OwnerClientId + " has: " + player.cardsInHand + " cards");
+                    Debug.Log("Amount of cards left in deck: " + createdCardsList.Count);
+                    player.cardsInHand.Add(createdCardsList[0]);
+                    createdCardsList.RemoveAt(0);
+                }
+                player.SetPlayer(player.cardsInHand);
+                //UpdatePlayersClientRpc(players);
+            }
         }
+
+        Debug.Log("Deal cards called for "+players.Count+" players");
+        //foreach (PlayerOwn player in players)
+        //{
+        //    while (player.cardsInHand.Count < maximumCardsInHand)
+        //    {
+        //        Debug.Log(player.OwnerClientId + " has: " + player.cardsInHand + " cards");
+        //        Debug.Log("Amount of cards left in deck: " + createdCardsList.Count);
+        //        player.cardsInHand.Add(createdCardsList[0]);
+        //        createdCardsList.RemoveAt(0);
+        //    }
+        //    player.SetPlayer(player.cardsInHand);
+        //}
     }
 
-    public void SetValueOfLastCard(int value)
+    [ServerRpc]
+    private void DealcardsServerRpc()
     {
-        lastCardPlayedValue.Value = value;
+        List<int> t1 = new List<int>();
+        foreach (PlayerOwn player in players)
+        {
+            while (player.cardsInHand.Count < maximumCardsInHand)
+            {
+                Debug.Log(player.OwnerClientId + " has: " + player.cardsInHand + " cards");
+                Debug.Log("Amount of cards left in deck: " + createdCardsList.Count);
+                player.cardsInHand.Add(createdCardsList[0]);
+                //UpdatePlayersClientRpc((int)createdCardsList[0].value);
+                player.UpdatePlayersClientRpc((int)createdCardsList[0].value);
+                createdCardsList.RemoveAt(0);
+            }
+            player.SetPlayer(player.cardsInHand);
+            player.CreateCardsInHandClientRpc();
+        }
+        
+        
     }
 
 
+
+    //private void AddHandToPlayer(PlayerOwn player, List<Card> cards)
+    //{
+
+    //    while (player.cardsInHand.Count > maximumCardsInHand)
+    //    {
+    //        player.cardsInHand.Add(createdCardsList[0]);
+    //        createdCardsList.RemoveAt(0);
+    //    }
+    //    player.SetPlayer(cards);
+        
+    //}
+
+
+
+    //private void CheckForAce()
+    //{
+    //    if ((int)lastCardPlayed[0].value ==(int)Values.ass)
+    //    {
+    //        lastCardPlayed.Clear();
+    //        lastCardPlayed.Add(playedCardList[0]);
+    //    }
+    //}
+
+    //public void SetValueOfLastCard(int value)
+    //{
+    //    lastCardPlayedValue.Value = value;
+    //}
+
+
+    // Logging changes of lates card played
+    public override void OnNetworkSpawn()
+    {
+        lastCardPlayedValue.OnValueChanged += (int prevVal, int newVal) =>
+        {
+            Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
+        };
+
+    }
 } //
 
 
