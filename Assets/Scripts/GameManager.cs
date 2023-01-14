@@ -25,6 +25,7 @@ public class GameManager : NetworkBehaviour
     public List<Colors> colorsAvaliable;
     public List<Values> valuesAvaliable;
 
+    public TMPro.TextMeshProUGUI text;
 
     [Header("Rules")]
     public int maximumCardsInHand;

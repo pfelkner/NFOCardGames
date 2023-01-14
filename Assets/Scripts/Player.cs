@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor;
+using TMPro;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
@@ -45,7 +45,7 @@ public class Player : NetworkBehaviour
         if (IsServer)
             UpdateServer();
         if (IsClient && IsOwner)
-            UpdateClient();
+            UpdateClientRpc();
     }
 
     private void UpdateServer()
@@ -69,11 +69,12 @@ public class Player : NetworkBehaviour
         value.Value = (Values)rnd;
     }
 
-
-    private void UpdateClient()
+    [ClientRpc]
+    private void UpdateClientRpc()
     {
         Debug.Log($"Owner: {OwnerClientId} is Updating Server");
         UpdateClientServerRpc(3, (int)value.Value);
+        GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
     }
 
     [ServerRpc]
@@ -82,7 +83,7 @@ public class Player : NetworkBehaviour
         Debug.Log("Updating Client from Server with color "+ (Colors)newColor+" and value "+ (Values)newValue);
         value.Value = (Values)newValue;
         color.Value = (Colors)newColor;
-
+        GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
     }
 
 
