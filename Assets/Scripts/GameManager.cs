@@ -17,8 +17,8 @@ public class GameManager : NetworkBehaviour
     public GameObject cardEmptyPrefab;
     public GameObject deckGO;
 
-    public List<PlayerOwn> players;
-    public PlayerOwn currentPlayer;
+    public List<Player> players;
+    public Player currentPlayer;
    
 
     [Header("DeckInfo")]
@@ -30,7 +30,7 @@ public class GameManager : NetworkBehaviour
     public int maximumCardsInHand;
 
     //[HideInInspector]
-    public List<Card> createdCardsList = new List<Card>();
+    public static List<Card> createdCardsList = new List<Card>();
 
 
     public List<Card> playedCardList = new List<Card>();
@@ -48,8 +48,8 @@ public class GameManager : NetworkBehaviour
     private void Start()
     {
         // basic
-        CreateDeck();
-        ShuffleDeck();
+        //CreateDeck();
+        //ShuffleDeck();
 
     }
 
@@ -58,10 +58,23 @@ public class GameManager : NetworkBehaviour
         // testing
         if (Input.GetKeyDown(KeyCode.T) && IsServer)
         {
-            DealCards();
+            //DealCards();
+            //DealCard();
+            
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+    //-------------------- Code before Test --------------------
     private void CreateDeck()
     {
         for (int i = 0; i < colorsAvaliable.Count ; i++)
@@ -122,7 +135,7 @@ public class GameManager : NetworkBehaviour
         }
         else if (IsOwner && IsServer)
         {
-            foreach (PlayerOwn player in players)
+            foreach (Player player in players)
             {
                 while (player.cardsInHand.Count < maximumCardsInHand)
                 {
@@ -137,7 +150,7 @@ public class GameManager : NetworkBehaviour
         }
 
         Debug.Log("Deal cards called for "+players.Count+" players");
-        //foreach (PlayerOwn player in players)
+        //foreach (Player player in players)
         //{
         //    while (player.cardsInHand.Count < maximumCardsInHand)
         //    {
@@ -154,7 +167,7 @@ public class GameManager : NetworkBehaviour
     private void DealcardsServerRpc()
     {
         List<int> t1 = new List<int>();
-        foreach (PlayerOwn player in players)
+        foreach (Player player in players)
         {
             while (player.cardsInHand.Count < maximumCardsInHand)
             {
@@ -174,7 +187,7 @@ public class GameManager : NetworkBehaviour
 
 
 
-    //private void AddHandToPlayer(PlayerOwn player, List<Card> cards)
+    //private void AddHandToPlayer(Player player, List<Card> cards)
     //{
 
     //    while (player.cardsInHand.Count > maximumCardsInHand)

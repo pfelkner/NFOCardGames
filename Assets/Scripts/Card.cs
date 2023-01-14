@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,8 +10,14 @@ public class Card : MonoBehaviour
 
 
    
-    public PlayerOwn cardOwner;
+    public Player cardOwner;
 
+    //public Card(Colors color, Values value, Player player)
+    //{
+    //    this.color = color;
+    //    this.value = value;
+    //    cardOwner = player;
+    //}
 
 
     private void OnMouseDown()
@@ -30,12 +37,18 @@ public class Card : MonoBehaviour
         this.value = newVal;
     }
 
-    public void SetPatent(PlayerOwn player, Transform parent)
+    public void SetPatent(Player player, Transform parent)
     {
         this.transform.transform.parent = parent;
         cardOwner = player;
     }
 
+    internal void SetCard(Colors diamond, Values king, Player player)
+    {
+        this.color = diamond;
+        this.value = king;
+        cardOwner = player;
+    }
 }
 
 
