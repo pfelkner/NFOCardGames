@@ -51,7 +51,7 @@ public class GameManager : NetworkBehaviour
         public NetworkCard(int col, int val) {
             color = col;
             value = val;
-            Debug.Log($"Created NetworkCard {value} of {color}");
+            Debug.Log($"Created NetworkCard {(Values)value} of {(Colors)color}");
         }
         int color;
         int value;
@@ -68,9 +68,9 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    
 
-    public void InitDeck()
+    [ClientRpc]
+    public void InitDeckClientRpc()
     {
         Debug.Log("Init deck called");
         for (int i = 0; i < colorsAvaliable.Count; i++)

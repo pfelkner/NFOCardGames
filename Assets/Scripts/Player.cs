@@ -45,7 +45,8 @@ public class Player : NetworkBehaviour
         // testing
         if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
-            GameManager.gM.InitDeck();
+            GameManager.gM.InitDeckClientRpc();
+            Debug.Log(networkHand.Count + " cards have been created.");
             DealCard();
 
         }
@@ -96,7 +97,7 @@ public class Player : NetworkBehaviour
             for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
             {
                 Debug.Log($"Player with Id {player} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
-                if (IsOwner)
+                if (true)
                 {
                     player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
                     deckIndex++;
