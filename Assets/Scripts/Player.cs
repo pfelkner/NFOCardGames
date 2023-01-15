@@ -44,7 +44,7 @@ public class Player : NetworkBehaviour
     {
         if (IsServer)
             UpdateServer();
-        if (IsClient && IsOwner)
+        else if (IsClient && IsOwner)
             UpdateClientRpc();
     }
 
@@ -72,7 +72,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void UpdateClientRpc()
     {
-        Debug.Log($"Owner: {OwnerClientId} is Updating Server");
+        Debug.Log($"Owner: {OwnerClientId} is Updating Client");
         UpdateClientServerRpc(3, (int)value.Value);
         GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
     }
