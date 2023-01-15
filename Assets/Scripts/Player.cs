@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using TMPro;
 using UnityEngine;
+using static UnityEngine.CullingGroup;
+using static GameManager;
+using UnityEditor.PackageManager;
 
 public class Player : NetworkBehaviour
 {
@@ -17,73 +20,153 @@ public class Player : NetworkBehaviour
     //private Card cardInHand = new Card();
     [SerializeField]
     public static List<int> cards = new List<int>();
+    [SerializeField]
+    public List<NetworkCard> networkHand = new List<NetworkCard>();
+
 
     private void OnEnable()
     {
         GameManager.gM.players.Add(this);
+        value.OnValueChanged += ShowCardDesc;
+    }
+
+    private void OnDisable()
+    {
+        value.OnValueChanged -= ShowCardDesc;
+    }
+    private void ShowCardDesc(Values prevVal, Values newVal)
+    {
+        if (IsOwner)
+            GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {newVal}";
     }
 
     private void Update()
     {
         // testing
-        if (Input.GetKeyDown(KeyCode.T) && IsServer)
+        if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
-            //DealCards();
+            GameManager.gM.InitDeck();
             DealCard();
 
         }
-        if (Input.GetKeyDown(KeyCode.U) && IsServer)
+        if (Input.GetKeyDown(KeyCode.U) && IsOwner)
         {
             //DealCards();
-            DealCard();
+            LogCards();
 
         }
+        
     }
 
     private void DealCard()
     {
-        if (IsServer)
-            UpdateServer();
-        else if (IsClient && IsOwner)
-            UpdateClientRpc();
+        //if (IsServer)
+        //    UpdateServer();
+        //if (IsClient && IsOwner && !IsServer)
+        //    UpdateClient();
+        if (IsOwner)
+        {
+            UpdateHandClientRpc();
+        }
+
     }
 
-    private void UpdateServer()
+
+    private void LogCards()
     {
-        
-        int rnd = UnityEngine.Random.Range(0, 8);
-        cards.Add(rnd);
-        //int rnd2 = UnityEngine.Random.Range(0, 8);
-        //cards.Add(rnd2);
-
-        Debug.Log($"Updating Server with card values: {rnd}");
-        //foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
-        //{
-        //    Debug.Log($"Updating client with Id: {uid}");
-        //    NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().value.Value = (Values)cards[index];
-        //    NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().color.Value = (Colors)3; ;
-        //    index++;
-        //}
-
-        color.Value = (Colors)3;
-        value.Value = (Values)rnd;
+        Debug.Log($"Player has the following {networkHand.Count} cards in Hand:");
+        foreach (NetworkCard networkCard in networkHand)
+        {
+            Debug.Log(networkCard.ToString());
+            
+        }
     }
 
     [ClientRpc]
-    private void UpdateClientRpc()
+    private void UpdateHandClientRpc()
     {
-        Debug.Log($"Owner: {OwnerClientId} is Updating Client");
-        UpdateClientServerRpc(3, (int)value.Value);
-        GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
+        int deckIndex = 0;
+        //foreach (var clientid in NetworkManager.Singleton.ConnectedClientsIds)
+        foreach (Player player in GameManager.gM.players)
+        {
+            Debug.Log($"Player with Id {player} is dealt cards");
+            //while (networkHand.Count < GameManager.gM.maximumCardsInHand)
+            //{
+
+            for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
+            {
+                Debug.Log($"Player with Id {player} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
+                if (IsOwner)
+                {
+                    player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
+                    deckIndex++;
+                }
+
+            }
+            //}
+            Debug.Log($"Player with Id {player} has now {networkHand.Count} cards in hand");
+        }
     }
 
-    [ServerRpc]
-    public void UpdateClientServerRpc(int newColor, int newValue)
+
+    private void UpdateServer()
     {
-        Debug.Log("Updating Client from Server with color "+ (Colors)newColor+" and value "+ (Values)newValue);
-        value.Value = (Values)newValue;
-        color.Value = (Colors)newColor;
-        GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
+        int deckIndex = 0;
+        foreach (var clientid in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            Debug.Log($"Player with Id {clientid} is dealt cards");
+            //while (networkHand.Count < GameManager.gM.maximumCardsInHand)
+            //{
+            
+            for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
+            {
+                Debug.Log($"Player with Id {clientid} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
+                if (IsOwner)
+                {
+                    GetPlayerById(clientid).networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
+                    deckIndex++;
+                }
+
+            }
+            //}
+            Debug.Log($"Player with Id {clientid} has now {networkHand.Count} cards in hand");
+        }
+
+
+
+        //int rnd = UnityEngine.Random.Range(0, 8);
+        //cards.Add(rnd);
+
+        //int rnd2 = UnityEngine.Random.Range(0, 8);
+        //cards.Add(rnd2);
+
+        //Debug.Log($"Updating Server with card values: {rnd}");
+
+
+        //color.Value = (Colors)3;
+        //value.Value = (Values)rnd;
+    }
+
+    ////[ClientRpc]
+    //private void UpdateClient()
+    //{
+    //    Debug.Log($"Owner: {OwnerClientId} is Updating Client");
+    //    UpdateClientServerRpc(3, (int)value.Value);
+    //    GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
+    //}
+
+    //[ServerRpc]
+    //public void UpdateClientServerRpc(int newColor, int newValue)
+    //{
+    //    Debug.Log("Updating Client from Server with color "+ (Colors)newColor+" and value "+ (Values)newValue);
+    //    value.Value = (Values)newValue;
+    //    color.Value = (Colors)newColor;
+    //    GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
+    //}
+
+    private Player GetPlayerById(ulong id)
+    {
+        return NetworkManager.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Player>();
     }
 
 

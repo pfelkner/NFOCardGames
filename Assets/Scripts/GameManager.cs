@@ -40,6 +40,49 @@ public class GameManager : NetworkBehaviour
 
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
+    [SerializeField]
+    public List<NetworkCard> networkDeck = new List<NetworkCard>();
+
+  
+
+    public struct NetworkCard : INetworkSerializable
+    {
+        public NetworkCard(int col, int val) {
+            color = col;
+            value = val;
+            Debug.Log($"Created NetworkCard {value} of {color}");
+        }
+        int color;
+        int value;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref color);
+            serializer.SerializeValue(ref value);
+        }
+
+        public override string ToString()
+        {
+            return $"{(Values)value} of {(Colors)color}";
+        }
+    }
+
+    
+
+    public void InitDeck()
+    {
+        Debug.Log("Init deck called");
+        for (int i = 0; i < colorsAvaliable.Count; i++)
+        {
+            for (int j = 0; j < valuesAvaliable.Count; j++)
+            {
+                networkDeck.Add(new NetworkCard(i, j));
+            }
+        }
+    }
+
+    
 
     private void Awake()
     {
