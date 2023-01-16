@@ -82,183 +82,6 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    
-
-    private void Awake()
-    {
-        if (gM == null) gM = this;
-    }
-
-    private void Start()
-    {
-        // basic
-        //CreateDeck();
-        //ShuffleDeck();
-
-    }
-
-    private void Update()
-    {
-        // testing
-        if (Input.GetKeyDown(KeyCode.T) && IsServer)
-        {
-            //DealCards();
-            //DealCard();
-            
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-    //-------------------- Code before Test --------------------
-    private void CreateDeck()
-    {
-        for (int i = 0; i < colorsAvaliable.Count ; i++)
-        {
-            for (int j = 0; j < valuesAvaliable.Count ; j++)
-            {
-                CreateCard(i,j);
-            }
-        }
-    }
-
-    private void CreateCard(int i,int j)
-    {
-        Colors newColor = colorsAvaliable[i];
-        Values newVal = valuesAvaliable[j];
-
-        GameObject gO = Instantiate(cardEmptyPrefab, transform.position, Quaternion.identity);
-        gO.name = newVal + " of "+ newColor;
-        gO.transform.SetParent(deckGO.transform);
-        Card card = gO.GetComponent<Card>();
-        card.SetCard(newColor, newVal);
-
-        createdCardsList.Add(card);
-    }
-
-    public Card CreateCardClient(int i, int j)
-    {
-        Colors newColor = colorsAvaliable[i];
-        Values newVal = valuesAvaliable[j];
-
-        GameObject gO = Instantiate(cardEmptyPrefab, transform.position, Quaternion.identity);
-        gO.name = newVal + " of " + newColor;
-        gO.transform.SetParent(deckGO.transform);
-        Card card = gO.GetComponent<Card>();
-        card.SetCard(newColor, newVal);
-
-        return card;
-    }
-
-    private void ShuffleDeck()
-    {
-        for (int i = 0; i < createdCardsList.Count; i++)
-        {
-            int rnd = Random.Range(1, createdCardsList.Count);
-            Card temp = createdCardsList[rnd];
-            createdCardsList[rnd] = createdCardsList[0];
-            createdCardsList[0] = temp;
-        }
-    }
-
-    private void DealCards()
-    {
-
-
-        if (IsOwner && !IsServer)
-        {
-            DealcardsServerRpc();
-        }
-        else if (IsOwner && IsServer)
-        {
-            foreach (Player player in players)
-            {
-                while (player.cardsInHand.Count < maximumCardsInHand)
-                {
-                    Debug.Log(player.OwnerClientId + " has: " + player.cardsInHand + " cards");
-                    Debug.Log("Amount of cards left in deck: " + createdCardsList.Count);
-                    player.cardsInHand.Add(createdCardsList[0]);
-                    createdCardsList.RemoveAt(0);
-                }
-                player.SetPlayer(player.cardsInHand);
-                //UpdatePlayersClientRpc(players);
-            }
-        }
-
-        Debug.Log("Deal cards called for "+players.Count+" players");
-        //foreach (Player player in players)
-        //{
-        //    while (player.cardsInHand.Count < maximumCardsInHand)
-        //    {
-        //        Debug.Log(player.OwnerClientId + " has: " + player.cardsInHand + " cards");
-        //        Debug.Log("Amount of cards left in deck: " + createdCardsList.Count);
-        //        player.cardsInHand.Add(createdCardsList[0]);
-        //        createdCardsList.RemoveAt(0);
-        //    }
-        //    player.SetPlayer(player.cardsInHand);
-        //}
-    }
-
-    [ServerRpc]
-    private void DealcardsServerRpc()
-    {
-        List<int> t1 = new List<int>();
-        foreach (Player player in players)
-        {
-            while (player.cardsInHand.Count < maximumCardsInHand)
-            {
-                Debug.Log(player.OwnerClientId + " has: " + player.cardsInHand + " cards");
-                Debug.Log("Amount of cards left in deck: " + createdCardsList.Count);
-                player.cardsInHand.Add(createdCardsList[0]);
-                //UpdatePlayersClientRpc((int)createdCardsList[0].value);
-                player.UpdatePlayersClientRpc((int)createdCardsList[0].value);
-                createdCardsList.RemoveAt(0);
-            }
-            player.SetPlayer(player.cardsInHand);
-            player.CreateCardsInHandClientRpc();
-        }
-        
-        
-    }
-
-
-
-    //private void AddHandToPlayer(Player player, List<Card> cards)
-    //{
-
-    //    while (player.cardsInHand.Count > maximumCardsInHand)
-    //    {
-    //        player.cardsInHand.Add(createdCardsList[0]);
-    //        createdCardsList.RemoveAt(0);
-    //    }
-    //    player.SetPlayer(cards);
-        
-    //}
-
-
-
-    //private void CheckForAce()
-    //{
-    //    if ((int)lastCardPlayed[0].value ==(int)Values.ass)
-    //    {
-    //        lastCardPlayed.Clear();
-    //        lastCardPlayed.Add(playedCardList[0]);
-    //    }
-    //}
-
-    //public void SetValueOfLastCard(int value)
-    //{
-    //    lastCardPlayedValue.Value = value;
-    //}
-
 
     // Logging changes of lates card played
     public override void OnNetworkSpawn()
@@ -269,6 +92,24 @@ public class GameManager : NetworkBehaviour
         };
 
     }
-} //
+
+
+    private void Awake()
+    {
+        if (gM == null) gM = this;
+    }
+
+    
+    private void ShuffleDeck()
+    {
+        for (int i = 0; i < createdCardsList.Count; i++)
+        {
+            int rnd = Random.Range(1, createdCardsList.Count);
+            Card temp = createdCardsList[rnd];
+            createdCardsList[rnd] = createdCardsList[0];
+            createdCardsList[0] = temp;
+        }
+    }
+}
 
 

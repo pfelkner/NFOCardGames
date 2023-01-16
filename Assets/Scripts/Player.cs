@@ -11,23 +11,18 @@ using UnityEditor.PackageManager;
 public class Player : NetworkBehaviour
 {
     public List<Card> cardsInHand;
-    private List<int> cardValues = new List<int>();
     [SerializeField]
     private NetworkVariable<Values> value = new NetworkVariable<Values>();
     [SerializeField]
     private NetworkVariable<Colors> color = new NetworkVariable<Colors>();
-    //[SerializeField]
-    //private Card cardInHand = new Card();
-    [SerializeField]
-    public static List<int> cards = new List<int>();
     [SerializeField]
     public List<NetworkCard> networkHand = new List<NetworkCard>();
-
     public GameObject cardPrefab;
 
 
     private void OnEnable()
     {
+        gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
         value.OnValueChanged += ShowCardDesc;
     }
@@ -54,24 +49,42 @@ public class Player : NetworkBehaviour
         }
         if (Input.GetKeyDown(KeyCode.U) && IsOwner)
         {
-            //DealCards();
             LogCards();
-
         }
-        
+        if (Input.GetKeyDown(KeyCode.O) && IsOwner)
+        {
+            //SpawnCards();
+        }
+    }
+
+    [ClientRpc]
+    private void SpawnCardsClientRpc()
+    {
+        float spacing = 0f;
+        foreach (NetworkCard networkCard in networkHand)
+        {
+            GameObject go = Instantiate(cardPrefab, new Vector2(-3f+spacing, -1f), Quaternion.identity);
+            Card currentCard = go.GetComponent<Card>();
+
+            currentCard.value = (Values)networkCard.value;
+            currentCard.color = (Colors)networkCard.color;
+            go.name = currentCard.value + " of " + currentCard.color;
+
+            currentCard.cardOwner = this;
+
+            cardsInHand.Add(currentCard);
+            spacing++;
+        }
     }
 
     private void DealCard()
     {
-        //if (IsServer)
-        //    UpdateServer();
-        //if (IsClient && IsOwner && !IsServer)
-        //    UpdateClient();
         if (IsOwner)
         {
             UpdateHandClientRpc();
         }
-
+        foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+            NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().SpawnCardsClientRpc();
     }
 
 
@@ -80,7 +93,8 @@ public class Player : NetworkBehaviour
         Debug.Log($"Player has the following {networkHand.Count} cards in Hand:");
         foreach (NetworkCard networkCard in networkHand)
         {
-            Debug.Log(networkCard.ToString());
+            Debug.Log("LocalClientId: "+NetworkManager.Singleton.LocalClientId+" "+networkCard.ToString());
+            Debug.Log("of "+NetworkObject.NetworkObjectId);
             
         }
     }
@@ -93,308 +107,18 @@ public class Player : NetworkBehaviour
         foreach (Player player in GameManager.gM.players)
         {
             Debug.Log($"Player with Id {player} is dealt cards");
-            //while (networkHand.Count < GameManager.gM.maximumCardsInHand)
-            //{
 
             for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
             {
-                Debug.Log($"Player with Id {player} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
-                if (true)
-                {
+                Debug.Log($"Player with Id {player.NetworkObjectId} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
+                player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
+                deckIndex++;
 
-                    player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
-                    deckIndex++;
-                }
-
-            } //
-            //}
+            }
             Debug.Log($"Player with Id {player} has now {networkHand.Count} cards in hand");
-            if (IsLocalPlayer)
-            {
-           
-                foreach (NetworkCard networkCard in networkHand)
-                {
-                    GameObject go = Instantiate(cardPrefab);
-                    NetworkObject no = go.GetComponent<NetworkObject>();
-
-                    no.Spawn();
-
-                    Card currenCard = go.GetComponent<Card>();
-                    
-                    currenCard.value = (Values)networkCard.value;
-                    currenCard.color = (Colors)networkCard.color;
-
-                    currenCard.cardOwner = this;
-
-                    cardsInHand.Add(currenCard);
-
-                    Debug.Log($"{(Values)networkCard.value}|{(Colors)networkCard.color} for {this.NetworkObjectId} but {currenCard.color}|{currenCard.value}");
-
-
-                }
-
-            }
+          
         }
 
-    }
-
-    public void TestInstaniate()
-    {
-        foreach (NetworkCard networkCard in networkHand)
-        {
-
-            GameObject go = Instantiate(cardPrefab);
-            go.GetComponent<Card>().value = (Values)networkCard.value;
-            Debug.Log($"{networkCard.value} for {this.gameObject.name} but {go.GetComponent<Card>().value}");
-
-        }
-
-
-    }
-
-    
-
-    private void UpdateServer()
-    {
-        int deckIndex = 0;
-        foreach (var clientid in NetworkManager.Singleton.ConnectedClientsIds)
-        {
-            Debug.Log($"Player with Id {clientid} is dealt cards");
-            //while (networkHand.Count < GameManager.gM.maximumCardsInHand)
-            //{
-            
-            for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
-            {
-                Debug.Log($"Player with Id {clientid} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
-                if (IsOwner)
-                {
-                    GetPlayerById(clientid).networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
-                    deckIndex++;
-                }
-
-            }
-            //}
-            Debug.Log($"Player with Id {clientid} has now {networkHand.Count} cards in hand");
-        }
-
-
-
-        //int rnd = UnityEngine.Random.Range(0, 8);
-        //cards.Add(rnd);
-
-        //int rnd2 = UnityEngine.Random.Range(0, 8);
-        //cards.Add(rnd2);
-
-        //Debug.Log($"Updating Server with card values: {rnd}");
-
-
-        //color.Value = (Colors)3;
-        //value.Value = (Values)rnd;
-    }
-
-    ////[ClientRpc]
-    //private void UpdateClient()
-    //{
-    //    Debug.Log($"Owner: {OwnerClientId} is Updating Client");
-    //    UpdateClientServerRpc(3, (int)value.Value);
-    //    GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
-    //}
-
-    //[ServerRpc]
-    //public void UpdateClientServerRpc(int newColor, int newValue)
-    //{
-    //    Debug.Log("Updating Client from Server with color "+ (Colors)newColor+" and value "+ (Values)newValue);
-    //    value.Value = (Values)newValue;
-    //    color.Value = (Colors)newColor;
-    //    GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {value.Value}";
-    //}
-
-    private Player GetPlayerById(ulong id)
-    {
-        return NetworkManager.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Player>();
-    }
-
-
-
-
-    //--------------------------------------------------------------------------------
-
-    [ClientRpc]
-    public void UpdatePlayersClientRpc(int card)
-    {
-        //this.players = players;
-        Debug.Log(card);
-        cardValues.Add(card);
-
-    }
-
-    public void GetCards(int maxcards)
-    {
-        while (cardsInHand.Count < maxcards)
-        {
-            Debug.Log(OwnerClientId + " has: " + cardsInHand + " cards");
-            Debug.Log("Amount of cards left in deck: " + GameManager.createdCardsList.Count);
-            cardsInHand.Add(GameManager.createdCardsList[0]);
-            //UpdatePlayersClientRpc((int)createdCardsList[0].value);
-            UpdatePlayersClientRpc((int)GameManager.createdCardsList[0].value);
-            GameManager.createdCardsList.RemoveAt(0);
-        }
-        SetPlayer(cardsInHand);
-        CreateCardsInHandClientRpc();
-    }
-
-
-    public void SetPlayer(List<Card> list)
-    {
-        //cardsInHand = list;
-        List<Card> tmp = new List<Card>();
-        float spacing = 0;
-        foreach(Card card in list)
-        {
-            GameObject created = Instantiate(card.gameObject,new Vector2(-3+spacing,-3),Quaternion.identity);
-            created.GetComponent<Card>().SetPatent(this, this.transform);
-            spacing++;
-            tmp.Add(created.GetComponent<Card>());
-        }
-        cardsInHand = tmp;
     }
     
-    public void SetLastCardValue(int valueChange)
-    {
-        if (IsOwner && !IsServer)
-        {
-            UpdateLatestPlayedServerRpc(valueChange);
-        } else if (IsOwner && IsServer)
-        {
-            GameManager.gM.lastCardPlayedValue.Value = valueChange;
-        }
-    }
-
-    [ServerRpc]
-    private void UpdateLatestPlayedServerRpc(int valueChange)
-    {
-        GameManager.gM.lastCardPlayedValue.Value = valueChange;
-        UpdateLatestPlayedClientRpc(valueChange);
-    }
-
-    [ClientRpc]
-    private void UpdateLatestPlayedClientRpc(int valueChange)
-    {
-        GameManager.gM.lastCardPlayedValue.Value = valueChange;
-    }
-
-
-    public List<Card> PlayerMove(Card topCard, int reps)
-    {
-        // returns list of played cards | emptyList = "pass"
-
-        List<Card> cardsToPlay = new List<Card>();
-        int indexOfCard = GetIndexOfHigher(topCard);
-        if (indexOfCard >= 0)
-        {
-            if(reps >= 2)
-            {
-                List<Card> temp = CheckCountePart(cardsInHand[indexOfCard]);
-                if(temp.Count == reps)
-                {
-                    cardsToPlay = new List<Card>(temp);
-                    foreach (var item in cardsToPlay)
-                    {
-                        cardsInHand.Remove(item);
-                    }
-                }
-
-            }
-            else
-            {
-                cardsToPlay.Add(cardsInHand[indexOfCard]);
-                cardsInHand.RemoveAt(indexOfCard);
-            }
-
-            if (cardsInHand.Count <= 0)
-            {
-                Debug.Log(transform.name + " won!");
-            }
-            Debug.Log("played" + cardsInHand[0].gameObject.name);
-            return cardsToPlay;
-        } else {
-            Debug.Log("pass");
-            return new List<Card>();
-        }
-    }
-
-    private int GetIndexOfHigher(Card topCard)
-    {
-        int inx = 0;
-        foreach (Card item in cardsInHand)
-        {
-            if ((int)item.value >(int)topCard.value)
-            {
-                return inx;
-            }
-            else inx++;
-
-        }
-        return -1;
-    }
-    private List<Card> CheckCountePart(Card _topcard)
-    {
-      return cardsInHand.FindAll(card=>(int)card.value  == (int)_topcard.value);
-    }
-
-    private void CheckCard(Player _player)
-    {
-        GameManager _gM = GameManager.gM;
-        Card topCard = GameManager.gM.lastCardPlayed[0];
-        List<Card> moveCards = _player.PlayerMove(topCard, _gM.lastCardPlayed.Count);
-        if (moveCards.Count == 0) return;
-         _gM.lastCardPlayed.Clear();
-        foreach (var item in moveCards)
-        {
-           _gM.playedCardList.Add(item);
-           _gM.lastCardPlayed.Add(item);
-        }
-    }
-
-    public void ChangeLastPlayed(int value)
-    {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            // server
-            GameManager.gM.lastCardPlayedValue.Value = value;
-        }
-        else
-        {
-            // client
-            SubmitLastCardValueServerRPC();
-        }
-    }
-
-    [ServerRpc]
-    public void SubmitLastCardValueServerRPC()
-    {
-       // GameManager.gM.lastCardPlayedValue.Value = 
-    }
-
-    public void DropCard(Card card)
-    {
-        Debug.Log("Destroying card");
-        cardsInHand.Remove(card);
-        GameManager.createdCardsList.Add(card);
-        Destroy(card.gameObject);
-    }
-
-    [ClientRpc]
-    public void CreateCardsInHandClientRpc()
-    {
-        cardsInHand.Clear();
-        foreach(int c in cardValues)
-        {
-            Debug.Log("Creating card for: val:" + c);
-            Card newCard = GameManager.gM.CreateCardClient(0, c);
-            cardsInHand.Add(newCard);
-        }
-        SetPlayer(cardsInHand);
-    }
-
 }

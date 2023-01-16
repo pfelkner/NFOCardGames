@@ -50,7 +50,7 @@ MonoBehaviour:
     m_InternalValue: 0
   color:
     m_InternalValue: 0
-  card: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
+  cardPrefab: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
 --- !u!114 &-4285500116299542200
 MonoBehaviour:
   m_ObjectHideFlags: 0

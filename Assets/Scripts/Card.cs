@@ -22,11 +22,11 @@ public class Card : MonoBehaviour
 
     private void OnMouseDown()
     {
-        cardOwner.SetLastCardValue((int)value);
+        
         
         transform.position = new Vector2(0, 1f);
 
-        cardOwner.DropCard(this);
+        
         //Destroy(this);
        
  
