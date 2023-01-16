@@ -39,7 +39,7 @@ public class Card : MonoBehaviour
 
     public void SetPatent(Player player, Transform parent)
     {
-        this.transform.transform.parent = parent;
+        transform.parent = parent;
         cardOwner = player;
     }
 

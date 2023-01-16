@@ -53,8 +53,8 @@ public class GameManager : NetworkBehaviour
             value = val;
             Debug.Log($"Created NetworkCard {(Values)value} of {(Colors)color}");
         }
-        int color;
-        int value;
+       public int color;
+       public int value;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {

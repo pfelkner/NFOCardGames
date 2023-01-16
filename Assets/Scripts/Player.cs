@@ -23,6 +23,8 @@ public class Player : NetworkBehaviour
     [SerializeField]
     public List<NetworkCard> networkHand = new List<NetworkCard>();
 
+    public GameObject cardPrefab;
+
 
     private void OnEnable()
     {
@@ -99,16 +101,58 @@ public class Player : NetworkBehaviour
                 Debug.Log($"Player with Id {player} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
                 if (true)
                 {
+
                     player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
                     deckIndex++;
                 }
 
-            }
+            } //
             //}
             Debug.Log($"Player with Id {player} has now {networkHand.Count} cards in hand");
+            if (IsLocalPlayer)
+            {
+           
+                foreach (NetworkCard networkCard in networkHand)
+                {
+                    GameObject go = Instantiate(cardPrefab);
+                    NetworkObject no = go.GetComponent<NetworkObject>();
+
+                    no.Spawn();
+
+                    Card currenCard = go.GetComponent<Card>();
+                    
+                    currenCard.value = (Values)networkCard.value;
+                    currenCard.color = (Colors)networkCard.color;
+
+                    currenCard.cardOwner = this;
+
+                    cardsInHand.Add(currenCard);
+
+                    Debug.Log($"{(Values)networkCard.value}|{(Colors)networkCard.color} for {this.NetworkObjectId} but {currenCard.color}|{currenCard.value}");
+
+
+                }
+
+            }
         }
+
     }
 
+    public void TestInstaniate()
+    {
+        foreach (NetworkCard networkCard in networkHand)
+        {
+
+            GameObject go = Instantiate(cardPrefab);
+            go.GetComponent<Card>().value = (Values)networkCard.value;
+            Debug.Log($"{networkCard.value} for {this.gameObject.name} but {go.GetComponent<Card>().value}");
+
+        }
+
+
+    }
+
+    
 
     private void UpdateServer()
     {
