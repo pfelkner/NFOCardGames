@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -43,7 +44,7 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
-
+    
 
 
 
@@ -140,17 +141,21 @@ public class GameManager : NetworkBehaviour
     }
 
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership =false)]
     public void SetFirstPlayerServerRpc()
     {
         currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
         currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
-       
+        currentPlayerNetworkClient.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
+        Debug.Log($"Current plaxer initially set to Player {currentPlayerId.Value}");
+        foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+            Debug.Log($"Player has id {uid}");
+
     }
 
 
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void SetCurrentPlayerServerRpc()
     {
         NetworkClient newCurrenPlayer = FindNextPlayer();

@@ -142,10 +142,11 @@ public class Player : NetworkBehaviour
 
     private void EndTurn()
     {
-
-        isCurrentPlayer = false;
-       
-        GameManager.gM.SetCurrentPlayerServerRpc();
+        if (isCurrentPlayer)
+        {
+            isCurrentPlayer = false;
+            GameManager.gM.SetCurrentPlayerServerRpc();
+        }
 
     }
 
@@ -153,19 +154,13 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void SetCurrentPlayerClientRpc(ulong previousValue, ulong newValue)
     {
-        if (newValue == GameManager.gM.currentPlayerId.Value)
+        if (newValue == NetworkManager.Singleton.LocalClientId)
         {
             isCurrentPlayer = true;
+            Debug.Log($"Player {newValue} is now current Player");
         }
         else 
             isCurrentPlayer = false;
-    }
-
-
-
-    private void CheckCurrentPlayer()
-    {
-      
     }
 
 
