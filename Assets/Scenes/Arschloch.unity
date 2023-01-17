@@ -1024,7 +1024,7 @@ GameObject:
   - component: {fileID: 1556018285}
   - component: {fileID: 1556018284}
   m_Layer: 0
-  m_Name: CardHolder
+  m_Name: SpriteHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

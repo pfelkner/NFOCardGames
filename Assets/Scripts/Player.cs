@@ -61,6 +61,8 @@ public class Player : NetworkBehaviour
     private void SpawnCardsClientRpc()
     {
         float spacing = 0f;
+
+        // crate cards locally
         foreach (NetworkCard networkCard in networkHand)
         {
             GameObject go = Instantiate(cardPrefab, new Vector2(-10f, -10f), Quaternion.identity);
