@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 public class GameManager : NetworkBehaviour
 {
-    // config
+    //----------------------- config start //-----------------------
     public static GameManager gM;
 
     [Header("SetUp")]
@@ -36,10 +36,12 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
+    public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
+   
 
-  
+
 
     public struct NetworkCard : INetworkSerializable
     {
@@ -63,7 +65,31 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private void Awake()
+    {
+        if (gM == null) gM = this;
+    }
 
+    public override void OnNetworkSpawn()
+    {
+        lastCardPlayedValue.OnValueChanged += (int prevVal, int newVal) =>
+        {
+            Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
+        };
+        rnd.OnValueChanged += ShuffleWithRandomClientRpc;
+
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        rnd.OnValueChanged -= ShuffleWithRandomClientRpc;
+    }
+
+
+    //----------------------- config end -----------------------
+
+
+    // All possible cards in a deck get created
     [ClientRpc]
     public void InitDeckClientRpc()
     {
@@ -78,32 +104,34 @@ public class GameManager : NetworkBehaviour
     }
 
 
-    // Logging changes of lates card played
-    public override void OnNetworkSpawn()
+    // starts the shuffling process
+    public void InitShuffle()
     {
-        lastCardPlayedValue.OnValueChanged += (int prevVal, int newVal) =>
+        for (int i = 0; i < 100; i++)
         {
-            Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
-        };
-
-    }
-
-
-    private void Awake()
-    {
-        if (gM == null) gM = this;
-    }
-
-    
-    private void ShuffleDeck()
-    {
-        for (int i = 0; i < createdCardsList.Count; i++)
-        {
-            int rnd = Random.Range(1, createdCardsList.Count);
-            Card temp = createdCardsList[rnd];
-            createdCardsList[rnd] = createdCardsList[0];
-            createdCardsList[0] = temp;
+            SetRandom();
         }
+    }
+
+
+    // Is attached to networkvariable random (of type int); on change the first card in the deck is stwiched with the card at position of the new radnom value
+    [ClientRpc]
+    private void ShuffleWithRandomClientRpc(int previousValue, int newValue)
+    {
+        Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} is shuffling");
+        NetworkCard temp = networkDeck[newValue];
+        networkDeck[newValue] = networkDeck[0];
+        networkDeck[0] = temp;
+    }
+
+
+
+    // Upon being called the networkvariable (is updated across the network) random is being set to a ranadom value;
+    // whenever this value changes the attacked listener triggers a method
+    public void SetRandom()
+    {
+        rnd.Value = Random.Range(1, networkDeck.Count);
+        Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} randomized. New value: {rnd}");
     }
 }
 

@@ -44,8 +44,13 @@ public class Player : NetworkBehaviour
         {
             GameManager.gM.InitDeckClientRpc();
             Debug.Log(networkHand.Count + " cards have been created.");
+            GameManager.gM.InitShuffle();
             DealCard();
 
+        }
+        if (Input.GetKeyDown(KeyCode.Z) && IsOwner)
+        {
+            DealCard();
         }
         if (Input.GetKeyDown(KeyCode.U) && IsOwner)
         {
@@ -53,9 +58,14 @@ public class Player : NetworkBehaviour
         }
         if (Input.GetKeyDown(KeyCode.O) && IsOwner)
         {
-            //SpawnCards();
+            GameManager.gM.InitShuffle();
+        }
+        if (Input.GetKeyDown(KeyCode.I) && IsOwner)
+        {
+            LogDeck();
         }
     }
+
 
     [ClientRpc]
     private void SpawnCardsClientRpc()
@@ -90,23 +100,7 @@ public class Player : NetworkBehaviour
         {
             NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().SpawnCardsClientRpc();
            
-        }
-
-           
-            
-            
-    }
-
-
-    private void LogCards()
-    {
-        Debug.Log($"Player has the following {networkHand.Count} cards in Hand:");
-        foreach (NetworkCard networkCard in networkHand)
-        {
-            Debug.Log("LocalClientId: "+NetworkManager.Singleton.LocalClientId+" "+networkCard.ToString());
-            Debug.Log("of "+NetworkObject.NetworkObjectId);
-            
-        }
+        }        
     }
 
     [ClientRpc]
@@ -130,5 +124,27 @@ public class Player : NetworkBehaviour
         }
 
     }
-    
+
+
+    // ----------------------- Utils -----------------------
+
+    private void LogCards()
+    {
+        Debug.Log($"Player has the following {networkHand.Count} cards in Hand:");
+        foreach (NetworkCard networkCard in networkHand)
+        {
+            Debug.Log("LocalClientId: "+NetworkManager.Singleton.LocalClientId+" "+networkCard.ToString());
+            Debug.Log("of "+NetworkObject.NetworkObjectId);
+            
+        }
+    }
+
+    private void LogDeck()
+    {
+        Debug.Log($"Deck consists of the following {networkHand.Count} cards:");
+        foreach (NetworkCard networkCard in GameManager.gM.networkDeck)
+        {
+            Debug.Log("LocalClientId: " + NetworkManager.Singleton.LocalClientId + " " + networkCard.ToString());
+        }
+    }
 }
