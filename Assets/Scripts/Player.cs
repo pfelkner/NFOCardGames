@@ -20,16 +20,20 @@ public class Player : NetworkBehaviour
     public GameObject cardPrefab;
 
 
+    public bool isCurrentPlayer = false;
+
     private void OnEnable()
     {
         gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
         value.OnValueChanged += ShowCardDesc;
+        GameManager.gM.currentPlayerId.OnValueChanged += SetCurrentPlayerClientRpc;
     }
 
     private void OnDisable()
     {
         value.OnValueChanged -= ShowCardDesc;
+        GameManager.gM.currentPlayerId.OnValueChanged -= SetCurrentPlayerClientRpc;
     }
     private void ShowCardDesc(Values prevVal, Values newVal)
     {
@@ -47,6 +51,11 @@ public class Player : NetworkBehaviour
             GameManager.gM.InitShuffle();
             DealCard();
 
+            GameManager.gM.SetFirstPlayerServerRpc();
+
+
+
+
         }
         if (Input.GetKeyDown(KeyCode.Z) && IsOwner)
         {
@@ -63,6 +72,12 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.I) && IsOwner)
         {
             LogDeck();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E) && IsOwner)
+        {
+            EndTurn();
+           
         }
     }
 
@@ -124,6 +139,35 @@ public class Player : NetworkBehaviour
         }
 
     }
+
+    private void EndTurn()
+    {
+
+        isCurrentPlayer = false;
+       
+        GameManager.gM.SetCurrentPlayerServerRpc();
+
+    }
+
+
+    [ClientRpc]
+    private void SetCurrentPlayerClientRpc(ulong previousValue, ulong newValue)
+    {
+        if (newValue == GameManager.gM.currentPlayerId.Value)
+        {
+            isCurrentPlayer = true;
+        }
+        else 
+            isCurrentPlayer = false;
+    }
+
+
+
+    private void CheckCurrentPlayer()
+    {
+      
+    }
+
 
 
     // ----------------------- Utils -----------------------

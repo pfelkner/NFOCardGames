@@ -14,7 +14,11 @@ public class GameManager : NetworkBehaviour
 
     public List<Player> players;
     public Player currentPlayer;
-   
+
+    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>();
+
+    public NetworkClient currentPlayerNetworkClient;
+
 
     [Header("DeckInfo")]
     public List<Colors> colorsAvaliable;
@@ -39,7 +43,7 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
-   
+
 
 
 
@@ -50,8 +54,8 @@ public class GameManager : NetworkBehaviour
             value = val;
             Debug.Log($"Created NetworkCard {(Values)value} of {(Colors)color}");
         }
-       public int color;
-       public int value;
+        public int color;
+        public int value;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -85,8 +89,7 @@ public class GameManager : NetworkBehaviour
         rnd.OnValueChanged -= ShuffleWithRandomClientRpc;
     }
 
-
-    //----------------------- config end -----------------------
+    //----------------------- Set Up ------------------------
 
 
     // All possible cards in a deck get created
@@ -104,6 +107,7 @@ public class GameManager : NetworkBehaviour
     }
 
 
+
     // starts the shuffling process
     public void InitShuffle()
     {
@@ -112,6 +116,7 @@ public class GameManager : NetworkBehaviour
             SetRandom();
         }
     }
+
 
 
     // Is attached to networkvariable random (of type int); on change the first card in the deck is stwiched with the card at position of the new radnom value
@@ -133,6 +138,50 @@ public class GameManager : NetworkBehaviour
         rnd.Value = Random.Range(1, networkDeck.Count);
         Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} randomized. New value: {rnd}");
     }
+
+
+    [ServerRpc]
+    public void SetFirstPlayerServerRpc()
+    {
+        currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
+        currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
+       
+    }
+
+
+
+    [ServerRpc]
+    public void SetCurrentPlayerServerRpc()
+    {
+        NetworkClient newCurrenPlayer = FindNextPlayer();
+        newCurrenPlayer.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
+        currentPlayerId.Value = newCurrenPlayer.ClientId;
+        
+
+    }
+
+    public NetworkClient FindNextPlayer()
+    {
+        if (FindCurrentPlayerIndex() +1 < NetworkManager.Singleton.ConnectedClientsList.Count)
+            return NetworkManager.Singleton.ConnectedClientsList[FindCurrentPlayerIndex() + 1];
+            
+        else
+            return NetworkManager.Singleton.ConnectedClientsList[0];
+    }
+
+    private int FindCurrentPlayerIndex()
+    {
+        int inx = 0;
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (client.ClientId == currentPlayerNetworkClient.ClientId)
+                return inx;
+            else
+                inx++;
+        }
+        return -1;
+    }
+
 }
 
 
