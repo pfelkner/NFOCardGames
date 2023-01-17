@@ -16,7 +16,7 @@ public class GameManager : NetworkBehaviour
     public List<Player> players;
     public Player currentPlayer;
 
-    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>();
+    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public NetworkClient currentPlayerNetworkClient;
 
@@ -82,7 +82,7 @@ public class GameManager : NetworkBehaviour
             Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
         };
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
-
+        currentPlayerId.Value = 69420;
     }
 
     public override void OnNetworkDespawn()
@@ -146,14 +146,23 @@ public class GameManager : NetworkBehaviour
     {
         currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
         currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
-        currentPlayerNetworkClient.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
         Debug.Log($"Current plaxer initially set to Player {currentPlayerId.Value}");
         foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
             Debug.Log($"Player has id {uid}");
 
     }
 
+    
+    public void T1(ulong id)
+    {
+        //NetworkClient newCurrenPlayer = FindNextPlayer();
+        //newCurrenPlayer.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
+        //currentPlayerId.Value = newCurrenPlayer.ClientId;
 
+        currentPlayerId.Value = id;
+
+
+    }
 
     [ServerRpc(RequireOwnership = false)]
     public void SetCurrentPlayerServerRpc()
