@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class Card : MonoBehaviour
@@ -12,44 +13,35 @@ public class Card : MonoBehaviour
    
     public Player cardOwner;
 
-    //public Card(Colors color, Values value, Player player)
-    //{
-    //    this.color = color;
-    //    this.value = value;
-    //    cardOwner = player;
-    //}
 
+    // visuals
+    public SpriteRenderer colorRenderer;
+    public SpriteRenderer valueRenderer;
+
+  
+
+
+    private void OnEnable()
+    {
+        Invoke("SetToSprite", 1f);
+    }
 
     private void OnMouseDown()
     {
-        
-        
         transform.position = new Vector2(0, 1f);
-
-        
-        //Destroy(this);
-       
- 
-    }
-    public void SetCard( Colors newCol, Values newVal)
-    {
-        this.color = newCol;
-        this.value = newVal;
     }
 
-    public void SetPatent(Player player, Transform parent)
+    public void SetToSprite()
     {
-        transform.parent = parent;
-        cardOwner = player;
+        int inx = (int)color;
+        colorRenderer.sprite = SpriteHolder.sP.colorSprites[inx];
+        inx = (int)value;
+        valueRenderer.sprite = SpriteHolder.sP.valueSprites[inx];
     }
 
-    internal void SetCard(Colors diamond, Values king, Player player)
-    {
-        this.color = diamond;
-        this.value = king;
-        cardOwner = player;
-    }
+
 }
+
 
 
 public enum Colors

@@ -63,7 +63,7 @@ public class Player : NetworkBehaviour
         float spacing = 0f;
         foreach (NetworkCard networkCard in networkHand)
         {
-            GameObject go = Instantiate(cardPrefab, new Vector2(-3f+spacing, -1f), Quaternion.identity);
+            GameObject go = Instantiate(cardPrefab, new Vector2(-10f, -10f), Quaternion.identity);
             Card currentCard = go.GetComponent<Card>();
 
             currentCard.value = (Values)networkCard.value;
@@ -75,6 +75,7 @@ public class Player : NetworkBehaviour
             cardsInHand.Add(currentCard);
             spacing++;
         }
+        SpriteHolder.sP.SetSpritesPosition(this);
     }
 
     private void DealCard()
@@ -84,7 +85,14 @@ public class Player : NetworkBehaviour
             UpdateHandClientRpc();
         }
         foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+        {
             NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().SpawnCardsClientRpc();
+           
+        }
+
+           
+            
+            
     }
 
 
