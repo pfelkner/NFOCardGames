@@ -26,24 +26,23 @@ public class Player : NetworkBehaviour
     {
         gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
-        
+        UIManager.Instance.endTurnBtn.onClick.AddListener(OnTurnEnd);
     }
 
     private void OnDisable()
     {
+       // UIManager.Instance.endTurnBtn.onClick.RemoveListener(OnTurnEnd);
     }
 
     public override void OnNetworkSpawn()
     {
-        GameManager.gM.currentPlayerId.OnValueChanged += StartTurnClientRpc;
-
-      //  UIManager.Instance.endTurnBtn.onClick.AddListener(OnTurnEnd);
+      //  GameManager.gM.currentPlayerId.OnValueChanged += StartTurnClientRpc;
     }
 
     public override void OnNetworkDespawn()
     {
         GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
-      //  UIManager.Instance.endTurnBtn.onClick.RemoveListener(OnTurnEnd);
+     
     }
 
 

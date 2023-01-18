@@ -16,9 +16,17 @@ public class UIManager : MonoBehaviour
 
     public Button endTurnBtn;
 
+    public TextMeshProUGUI cardTOBeatText;
+    public TextMeshProUGUI amountToBeat;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
+        
+    }
+
+    private void OnEnable()
+    {
         
     }
     public void ClickHost()
@@ -38,4 +46,14 @@ public class UIManager : MonoBehaviour
         hostClientText.text = "Client";
 
     }
+
+    public void ChangeTextForPlayerValue(Values val)
+    {
+        cardTOBeatText.text = " of " + val.ToString();
+    }
+    public void ChangeTextForPlayerInt( int amount)
+    {
+        amountToBeat.text = amount.ToString();
+    }
+
 }

@@ -86,10 +86,16 @@ public class GameManager : NetworkBehaviour
     {
         lastCardPlayedValue.OnValueChanged += (int prevVal, int newVal) =>
         {
-            Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
+            UIManager.Instance.ChangeTextForPlayerValue((Values)newVal);
         };
+        lastCardPlayedAmount.OnValueChanged += (int prevVal, int newVal) =>
+        {
+            UIManager.Instance.ChangeTextForPlayerInt(newVal);
+        };
+      
 
-        
+
+
 
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
@@ -184,12 +190,14 @@ public class GameManager : NetworkBehaviour
     public void SetLastCardServerRpc(int value)
     {
         lastCardPlayedValue.Value = value;
+       
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void SetLastAmountServerRpc(int value)
     {
         lastCardPlayedAmount.Value = value;
+       
     }
 
 
