@@ -18,19 +18,35 @@ public class Card : MonoBehaviour
     public SpriteRenderer colorRenderer;
     public SpriteRenderer valueRenderer;
 
-  
+    private Vector2 oGPos;
+    private bool isSelected;
+
+
 
 
     private void OnEnable()
     {
         Invoke("SetToSprite", 1f);
+
     }
 
     private void OnMouseDown()
     {
-        Debug.Log(cardOwner.NetworkObjectId + " " + GameManager.gM.currentPlayerId.Value);
-        if (cardOwner.NetworkObjectId == GameManager.gM.currentPlayerId.Value)
-            transform.position = new Vector2(0, 1f);
+
+        transform.position = new Vector2(0, 1f);
+
+        if (!isSelected && cardOwner.IsValidCard(this))
+        {
+            oGPos = transform.position;
+            transform.position = oGPos + Vector2.up;
+            isSelected = true;
+
+        }
+        else if (isSelected)
+        {
+            transform.position = oGPos;
+            isSelected = false;
+        }
 
     }
 
