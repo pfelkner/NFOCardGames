@@ -26,8 +26,8 @@ public class SpriteHolder : MonoBehaviour
 
                 for (int i = 0; i < player.cardsInHand.Count; i++)
                 {
-                    player.cardsInHand[i].transform.position = new Vector2(-3.5f+padding,-1.5f+offSet);
-                    padding += 1.5f;
+                    player.cardsInHand[i].transform.position = new Vector2(-5f+padding,-1.5f+offSet);
+                    padding += 3f;
                 }
                 offSet += 3;
 

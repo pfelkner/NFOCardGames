@@ -111,7 +111,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Init deck called");
         for (int i = 0; i < colorsAvaliable.Count; i++)
         {
-            for (int j = 0; j < valuesAvaliable.Count; j++)
+            for (int j = 1; j < valuesAvaliable.Count+1; j++)
             {
                 networkDeck.Add(new NetworkCard(i, j));
             }
@@ -151,6 +151,7 @@ public class GameManager : NetworkBehaviour
     }
 
 
+
     //----------------------- Handling player order ------------------------
 
 
@@ -178,6 +179,19 @@ public class GameManager : NetworkBehaviour
         }
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SetLastCardServerRpc(int value)
+    {
+        lastCardPlayedValue.Value = value;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SetLastAmountServerRpc(int value)
+    {
+        lastCardPlayedAmount.Value = value;
+    }
+
 
 
 }

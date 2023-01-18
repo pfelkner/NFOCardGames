@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class Card : MonoBehaviour
     private bool isSelected;
 
 
+    
 
 
     private void OnEnable()
@@ -33,29 +35,40 @@ public class Card : MonoBehaviour
     private void OnMouseDown()
     {
 
-        transform.position = new Vector2(0, 1f);
+        
 
         if (!isSelected && cardOwner.IsValidCard(this))
         {
-            oGPos = transform.position;
-            transform.position = oGPos + Vector2.up;
-            isSelected = true;
-
+            SelectCard();
         }
         else if (isSelected)
         {
-            transform.position = oGPos;
-            isSelected = false;
+            DeSelectCard();
         }
 
     }
-
+    //invoked
     public void SetToSprite()
     {
         int inx = (int)color;
         colorRenderer.sprite = SpriteHolder.sP.colorSprites[inx];
         inx = (int)value;
         valueRenderer.sprite = SpriteHolder.sP.valueSprites[inx];
+    }
+
+    private void SelectCard()
+    {
+        oGPos = transform.position;
+        transform.position = oGPos + Vector2.up*2;
+        isSelected = true;
+        cardOwner.selectedCards.Add(this);
+    }
+
+    public void DeSelectCard()
+    {
+        transform.position = oGPos;
+        cardOwner.selectedCards.Remove(this);
+        isSelected = false;
     }
 
 

@@ -7,6 +7,7 @@ using UnityEngine;
 using static UnityEngine.CullingGroup;
 using static GameManager;
 using UnityEditor.PackageManager;
+using Unity.VisualScripting;
 
 public class Player : NetworkBehaviour
 {
@@ -18,6 +19,8 @@ public class Player : NetworkBehaviour
     [SerializeField]
     public List<NetworkCard> networkHand = new List<NetworkCard>();
     public GameObject cardPrefab;
+
+    public List<Card> selectedCards = new List<Card>();
 
     private void OnEnable()
     {
@@ -33,11 +36,14 @@ public class Player : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         GameManager.gM.currentPlayerId.OnValueChanged += StartTurnClientRpc;
+
+      //  UIManager.Instance.endTurnBtn.onClick.AddListener(OnTurnEnd);
     }
 
     public override void OnNetworkDespawn()
     {
         GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
+      //  UIManager.Instance.endTurnBtn.onClick.RemoveListener(OnTurnEnd);
     }
 
 
@@ -64,13 +70,7 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.V) && IsClient && IsOwner)
         {
-            if (IsCurrentPlayer())
-            {
-                // move
-                GameManager.gM.NextPlayerServerRpc();
-                
-
-            }
+            OnTurnEnd();
         }
     }
 
@@ -152,7 +152,80 @@ public class Player : NetworkBehaviour
         
     }
 
+    // btn press
+    public void OnTurnEnd()
+    {
+
+        if (GameManager.gM.lastCardPlayedAmount.Value == 0)
+        {
+            GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+        }
+        if (selectedCards.Count == 0)
+        {
+            GameManager.gM.SetLastAmountServerRpc(0);
+        }
+
+        // alredy checked for higher only need to check if equal
+        if (!CheckCardsEqual() || selectedCards.Count != GameManager.gM.lastCardPlayedAmount.Value)
+        {
+                foreach (Card item in selectedCards)
+                {
+                    item.DeSelectCard();
+                }
+                return;
+        }
+
+
+        // change network variables on server gm
+        if (IsClient && IsOwner)
+        {
+            if (IsCurrentPlayer())
+            {
+                // setting last card
+                if (selectedCards.Count == 0) // pass
+                {
+                    GameManager.gM.SetLastAmountServerRpc(0);
+                    GameManager.gM.SetLastCardServerRpc(0); 
+                }
+                else
+                {
+                    GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
+                    GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+                }
+                // setting new player
+                GameManager.gM.NextPlayerServerRpc();
+            }
+        }
+        // destroy cards locally
+        foreach (Card item in selectedCards)
+        {
+            item.gameObject.SetActive(false);
+        }
+        selectedCards.Clear();
+    }
+
+
     // ----------------------- Utils -----------------------
+
+   
+    private bool CheckCardsEqual()
+    {
+        // we have more than one card selected
+        if (selectedCards.Count > 0)
+        {   // we have more than two cards selected
+            if (selectedCards.Count > 1)
+            {
+                // the first two match
+                if (selectedCards[0].value == selectedCards[1].value)
+                {
+                    return true;
+                } // the cards are not equal -> no valid move
+                else return false;
+            } // there os only one card selected 
+           else return true;
+        }// there is no card selected but valid move 
+       else return true; 
+    }
 
     private void LogCards()
     {
