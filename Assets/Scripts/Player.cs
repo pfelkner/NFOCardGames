@@ -19,20 +19,15 @@ public class Player : NetworkBehaviour
     public List<NetworkCard> networkHand = new List<NetworkCard>();
     public GameObject cardPrefab;
 
-
-    public bool isCurrentPlayer = false;
-
     private void OnEnable()
     {
         gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
-        value.OnValueChanged += ShowCardDesc;
         
     }
 
     private void OnDisable()
     {
-        value.OnValueChanged -= ShowCardDesc;
     }
 
     public override void OnNetworkSpawn()
@@ -45,11 +40,6 @@ public class Player : NetworkBehaviour
         GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
     }
 
-    private void ShowCardDesc(Values prevVal, Values newVal)
-    {
-        if (IsOwner)
-            GameManager.gM.text.text = $"Card color: {color.Value}; Card value: {newVal}";
-    }
 
     private void Update()
     {
@@ -60,57 +50,23 @@ public class Player : NetworkBehaviour
             Debug.Log(networkHand.Count + " cards have been created.");
             GameManager.gM.InitShuffle();
             DealCard();
-
             GameManager.gM.SetFirstPlayerServerRpc();
 
-
-
-
-        }
-        if (Input.GetKeyDown(KeyCode.Z) && IsOwner)
-        {
-            DealCard();
         }
         if (Input.GetKeyDown(KeyCode.U) && IsOwner)
         {
             LogCards();
-        }
-        if (Input.GetKeyDown(KeyCode.O) && IsOwner)
-        {
-            GameManager.gM.InitShuffle();
         }
         if (Input.GetKeyDown(KeyCode.I) && IsOwner)
         {
             LogDeck();
         }
 
-        if (Input.GetKeyDown(KeyCode.E) && IsOwner)
-        {
-            //EndTurn();
-            Debug.Log("##############");
-            foreach (var id in NetworkManager.Singleton.ConnectedClientsIds)
-                Debug.Log(id);
-            Debug.Log("##############");
-        }
-        if (Input.GetKeyDown(KeyCode.N) && IsOwner)
-        {
-            Debug.Log("N pressed");
-            if (GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId)
-                GameManager.gM.T1ServerRpc(0);
-        }
-        if (Input.GetKeyDown(KeyCode.M) && IsOwner)
-        {
-            Debug.Log("M pressed");
-            if (GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId)
-                GameManager.gM.T1ServerRpc(1);
-        }
         if (Input.GetKeyDown(KeyCode.V) && IsClient && IsOwner)
         {
-            if (GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId)
+            if (IsCurrentPlayer())
             {
-                Debug.Log("VVVVVVVVVVVVVVV");
-                Debug.Log("ID: "+NetworkManager.Singleton.LocalClientId);
-                GameManager.gM.SetCurrentPlayerServerRpc();
+                GameManager.gM.NextPlayerTestServerRpc();
             }
         }
     }
@@ -169,48 +125,11 @@ public class Player : NetworkBehaviour
 
             }
             Debug.Log($"Player with Id {player} has now {networkHand.Count} cards in hand");
-          
         }
-
     }
 
-    public void StartTurn()
-    {
-        //check cards in middle, can I pay?
-        //either paly or pass
-        // remove played cards from networkhand / destroy from scene
-    }
 
-    private void EvaluateTurn()
-    {
-        // how many crds palyed
-        // what value played
-        // cards in  hand left ? HasWon() : EndTurn
-    }
-
-    private void EndTurn()
-    {
-        if (isCurrentPlayer)
-        {
-            isCurrentPlayer = false;
-            GameManager.gM.SetCurrentPlayerServerRpc();
-        }
-
-    }
-
-    public void HasWon()
-    {
-        // set as winner
-        // end turn
-        // call EndGame()
-    }
-
-    private void EndGame()
-    {
-        // destroy cards from scene
-        // empty networkHand
-    }
-
+    // this will contain clicking cards and checking wchich cards are viable to play
     [ClientRpc]
     private void StartTurnClientRpc(ulong previousValue, ulong newValue)
     {
@@ -223,34 +142,6 @@ public class Player : NetworkBehaviour
         else
             Debug.Log($"Not {NetworkManager.Singleton.LocalClientId}'s turn");
     }
-
-    [ClientRpc]
-    private void SetCurrentPlayerClientRpc(ulong previousValue, ulong newValue)
-    {
-        Debug.Log($"SetCurrentPlayerClientRpc: previous: {previousValue}, new: {newValue}");
-        Debug.Log($"LocalClientId is {NetworkManager.Singleton.LocalClientId}");
-        if (newValue == NetworkManager.Singleton.LocalClientId)
-        {
-            isCurrentPlayer = true;
-            Debug.Log($"Player {newValue} is now current Player");
-        }
-        else 
-            isCurrentPlayer = false;
-    }
-
-    private void SetCurrentPlayerClient(ulong previousValue, ulong newValue)
-    {
-        Debug.Log($"SetCurrentPlayerClient: previous: {previousValue}, new: {newValue}");
-        if (newValue == NetworkManager.Singleton.LocalClientId)
-        {
-            isCurrentPlayer = true;
-            Debug.Log($"Player {newValue} is now current Player");
-        }
-        else
-            isCurrentPlayer = false;
-    }
-
-
 
     // ----------------------- Utils -----------------------
 
@@ -272,5 +163,10 @@ public class Player : NetworkBehaviour
         {
             Debug.Log("LocalClientId: " + NetworkManager.Singleton.LocalClientId + " " + networkCard.ToString());
         }
+    }
+
+    public bool IsCurrentPlayer()
+    {
+        return GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId;
     }
 }

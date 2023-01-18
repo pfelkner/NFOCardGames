@@ -15,6 +15,7 @@ public class GameManager : NetworkBehaviour
 
     public List<Player> players;
     public Player currentPlayer;
+    int index;
 
     public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
@@ -45,8 +46,6 @@ public class GameManager : NetworkBehaviour
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
     
-
-
 
     public struct NetworkCard : INetworkSerializable
     {
@@ -83,6 +82,7 @@ public class GameManager : NetworkBehaviour
         };
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
+        index = 0;
     }
 
     public override void OnNetworkDespawn()
@@ -130,13 +130,6 @@ public class GameManager : NetworkBehaviour
         networkDeck[0] = temp;
     }
 
-    public void OnTestClick()
-    {
-        Debug.Log("+++++++++++");
-        Debug.Log("ID: " + NetworkManager.Singleton.LocalClientId);
-    }
-
-
 
     // Upon being called the networkvariable (is updated across the network) random is being set to a ranadom value;
     // whenever this value changes the attacked listener triggers a method
@@ -147,66 +140,34 @@ public class GameManager : NetworkBehaviour
     }
 
 
+    //----------------------- Handling player order ------------------------
+
+
     [ServerRpc(RequireOwnership =false)]
     public void SetFirstPlayerServerRpc()
     {
         currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
         currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
         Debug.Log($"Current plaxer initially set to Player {currentPlayerId.Value}");
-        foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
-            Debug.Log($"Player has id {uid}");
-
     }
 
-    private void StartRound()
-    {
-        
-    }
-
-    [ServerRpc(RequireOwnership =false)]
-    public void T1ServerRpc(ulong id)
-    {
-        //NetworkClient newCurrenPlayer = FindNextPlayer();
-        //newCurrenPlayer.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
-        //currentPlayerId.Value = newCurrenPlayer.ClientId;
-
-        currentPlayerId.Value = id;
-
-
-    }
 
     [ServerRpc(RequireOwnership = false)]
-    public void SetCurrentPlayerServerRpc()
+    public void NextPlayerTestServerRpc()
     {
-        Debug.Log("Called SetCurrentPlayerServerRpc");
-        NetworkClient newCurrenPlayer = FindNextPlayer();
-        newCurrenPlayer.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
-        currentPlayerId.Value = newCurrenPlayer.ClientId;
-        Debug.Log("New curretn player is set to " + newCurrenPlayer.ClientId);
-
-    }
-
-    public NetworkClient FindNextPlayer()
-    {
-        if (FindCurrentPlayerIndex() +1 < NetworkManager.Singleton.ConnectedClientsList.Count)
-            return NetworkManager.Singleton.ConnectedClientsList[FindCurrentPlayerIndex() + 1];
-            
-        else
-            return NetworkManager.Singleton.ConnectedClientsList[0];
-    }
-
-    private int FindCurrentPlayerIndex()
-    {
-        int inx = 0;
-        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        Debug.Log("Called NextPlayerTestServerRpc");
+        if (index + 1 < NetworkManager.Singleton.ConnectedClientsList.Count)
         {
-            if (client.ClientId == currentPlayerNetworkClient.ClientId)
-                return inx;
-            else
-                inx++;
+            index++;
+            Debug.Log("Incrementing index to "+index);
+        } else
+        {
+            index = 0;
+            Debug.Log("Resetting index to 0");
         }
-        return -1;
+        currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
     }
+
 
 }
 
