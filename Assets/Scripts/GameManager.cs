@@ -16,7 +16,7 @@ public class GameManager : NetworkBehaviour
     public List<Player> players;
     public Player currentPlayer;
 
-    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     public NetworkClient currentPlayerNetworkClient;
 
@@ -130,6 +130,12 @@ public class GameManager : NetworkBehaviour
         networkDeck[0] = temp;
     }
 
+    public void OnTestClick()
+    {
+        Debug.Log("+++++++++++");
+        Debug.Log("ID: " + NetworkManager.Singleton.LocalClientId);
+    }
+
 
 
     // Upon being called the networkvariable (is updated across the network) random is being set to a ranadom value;
@@ -152,8 +158,13 @@ public class GameManager : NetworkBehaviour
 
     }
 
-    
-    public void T1(ulong id)
+    private void StartRound()
+    {
+        
+    }
+
+    [ServerRpc(RequireOwnership =false)]
+    public void T1ServerRpc(ulong id)
     {
         //NetworkClient newCurrenPlayer = FindNextPlayer();
         //newCurrenPlayer.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
@@ -167,10 +178,11 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SetCurrentPlayerServerRpc()
     {
+        Debug.Log("Called SetCurrentPlayerServerRpc");
         NetworkClient newCurrenPlayer = FindNextPlayer();
         newCurrenPlayer.PlayerObject.GetComponent<Player>().isCurrentPlayer = true;
         currentPlayerId.Value = newCurrenPlayer.ClientId;
-        
+        Debug.Log("New curretn player is set to " + newCurrenPlayer.ClientId);
 
     }
 

@@ -27,14 +27,24 @@ public class Player : NetworkBehaviour
         gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
         value.OnValueChanged += ShowCardDesc;
-        GameManager.gM.currentPlayerId.OnValueChanged += SetCurrentPlayerClient;
+        
     }
 
     private void OnDisable()
     {
         value.OnValueChanged -= ShowCardDesc;
-        GameManager.gM.currentPlayerId.OnValueChanged -= SetCurrentPlayerClient;
     }
+
+    public override void OnNetworkSpawn()
+    {
+        GameManager.gM.currentPlayerId.OnValueChanged += StartTurnClientRpc;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
+    }
+
     private void ShowCardDesc(Values prevVal, Values newVal)
     {
         if (IsOwner)
@@ -86,13 +96,22 @@ public class Player : NetworkBehaviour
         {
             Debug.Log("N pressed");
             if (GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId)
-                GameManager.gM.T1(0);
+                GameManager.gM.T1ServerRpc(0);
         }
         if (Input.GetKeyDown(KeyCode.M) && IsOwner)
         {
             Debug.Log("M pressed");
             if (GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId)
-                GameManager.gM.T1(1);
+                GameManager.gM.T1ServerRpc(1);
+        }
+        if (Input.GetKeyDown(KeyCode.V) && IsClient && IsOwner)
+        {
+            if (GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId)
+            {
+                Debug.Log("VVVVVVVVVVVVVVV");
+                Debug.Log("ID: "+NetworkManager.Singleton.LocalClientId);
+                GameManager.gM.SetCurrentPlayerServerRpc();
+            }
         }
     }
 
@@ -192,11 +211,24 @@ public class Player : NetworkBehaviour
         // empty networkHand
     }
 
+    [ClientRpc]
+    private void StartTurnClientRpc(ulong previousValue, ulong newValue)
+    {
+        //Debug.Log($"SetCurrentPlayerClientRpc: previous: {previousValue}, new: {newValue}");
+        
+        if (newValue == NetworkManager.Singleton.LocalClientId)
+        {
+            Debug.Log($"Player {newValue} is now current Player");
+        }
+        else
+            Debug.Log($"Not {NetworkManager.Singleton.LocalClientId}'s turn");
+    }
 
     [ClientRpc]
     private void SetCurrentPlayerClientRpc(ulong previousValue, ulong newValue)
     {
         Debug.Log($"SetCurrentPlayerClientRpc: previous: {previousValue}, new: {newValue}");
+        Debug.Log($"LocalClientId is {NetworkManager.Singleton.LocalClientId}");
         if (newValue == NetworkManager.Singleton.LocalClientId)
         {
             isCurrentPlayer = true;
