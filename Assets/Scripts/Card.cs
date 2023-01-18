@@ -28,7 +28,10 @@ public class Card : MonoBehaviour
 
     private void OnMouseDown()
     {
-        transform.position = new Vector2(0, 1f);
+        Debug.Log(cardOwner.NetworkObjectId + " " + GameManager.gM.currentPlayerId.Value);
+        if (cardOwner.NetworkObjectId == GameManager.gM.currentPlayerId.Value)
+            transform.position = new Vector2(0, 1f);
+
     }
 
     public void SetToSprite()
