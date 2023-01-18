@@ -21,9 +21,9 @@ public class Player : NetworkBehaviour
 
     private void OnEnable()
     {
-        gameObject.name = $"Player {gM.players.Count+1}";
+        gameObject.name = $"Player {gM.players.Count + 1}";
         GameManager.gM.players.Add(this);
-        
+
     }
 
     private void OnDisable()
@@ -68,7 +68,7 @@ public class Player : NetworkBehaviour
             {
                 // move
                 GameManager.gM.NextPlayerServerRpc();
-                
+
 
             }
         }
@@ -107,8 +107,8 @@ public class Player : NetworkBehaviour
         foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
         {
             NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().SpawnCardsClientRpc();
-           
-        }        
+
+        }
     }
 
     [ClientRpc]
@@ -137,7 +137,7 @@ public class Player : NetworkBehaviour
     private void StartTurnClientRpc(ulong previousValue, ulong newValue)
     {
         //Debug.Log($"SetCurrentPlayerClientRpc: previous: {previousValue}, new: {newValue}");
-        
+
         if (newValue == NetworkManager.Singleton.LocalClientId)
         {
             Debug.Log($"Player {newValue} is now current Player");
@@ -149,7 +149,7 @@ public class Player : NetworkBehaviour
     public bool IsValidCard(Card card)
     {
         return (int)card.value > GameManager.gM.lastCardPlayedValue.Value;
-        
+
     }
 
     // ----------------------- Utils -----------------------
@@ -159,9 +159,9 @@ public class Player : NetworkBehaviour
         Debug.Log($"Player has the following {networkHand.Count} cards in Hand:");
         foreach (NetworkCard networkCard in networkHand)
         {
-            Debug.Log("LocalClientId: "+NetworkManager.Singleton.LocalClientId+" "+networkCard.ToString());
-            Debug.Log("of "+NetworkObject.NetworkObjectId);
-            
+            Debug.Log("LocalClientId: " + NetworkManager.Singleton.LocalClientId + " " + networkCard.ToString());
+            Debug.Log("of " + NetworkObject.NetworkObjectId);
+
         }
     }
 
@@ -177,5 +177,11 @@ public class Player : NetworkBehaviour
     public bool IsCurrentPlayer()
     {
         return GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId;
+    }
+
+    public bool hasWon()
+    {
+        if (cardsInHand.Count == 0) return true;
+        return false;
     }
 }

@@ -51,13 +51,16 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
-    
+
+    public NetworkVariable<ulong> winnerId = new NetworkVariable<ulong>(69420, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
 
 
 
     public struct NetworkCard : INetworkSerializable
     {
-        public NetworkCard(int col, int val) {
+        public NetworkCard(int col, int val)
+        {
             color = col;
             value = val;
             Debug.Log($"Created NetworkCard {(Values)value} of {(Colors)color}");
@@ -89,7 +92,7 @@ public class GameManager : NetworkBehaviour
             Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
         };
 
-        
+
 
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
@@ -154,7 +157,7 @@ public class GameManager : NetworkBehaviour
     //----------------------- Handling player order ------------------------
 
 
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc(RequireOwnership = false)]
     public void SetFirstPlayerServerRpc()
     {
         currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
@@ -170,14 +173,25 @@ public class GameManager : NetworkBehaviour
         if (index + 1 < NetworkManager.Singleton.ConnectedClientsList.Count)
         {
             index++;
-            Debug.Log("Incrementing index to "+index);
-        } else
+            Debug.Log("Incrementing index to " + index);
+        }
+        else
         {
             index = 0;
             Debug.Log("Resetting index to 0");
         }
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
     }
+
+
+    //----------------------- Game/Round End  ------------------------
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SetWinnerServerRpc(ulong id)
+    {
+        winnerId.Value = id;
+    }
+
 
 
 }
