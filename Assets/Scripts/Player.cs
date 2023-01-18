@@ -66,7 +66,10 @@ public class Player : NetworkBehaviour
         {
             if (IsCurrentPlayer())
             {
-                GameManager.gM.NextPlayerTestServerRpc();
+                // move
+                GameManager.gM.NextPlayerServerRpc();
+                
+
             }
         }
     }
@@ -141,6 +144,12 @@ public class Player : NetworkBehaviour
         }
         else
             Debug.Log($"Not {NetworkManager.Singleton.LocalClientId}'s turn");
+    }
+
+    public bool IsValidCard(Card card)
+    {
+        return (int)card.value > GameManager.gM.lastCardPlayedValue.Value;
+        
     }
 
     // ----------------------- Utils -----------------------

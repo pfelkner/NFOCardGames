@@ -40,12 +40,20 @@ public class GameManager : NetworkBehaviour
 
 
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    // 
+    public NetworkVariable<bool> lastCardIsHeart = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<bool> lastCardIsClub = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<bool> lastCardIsSpades = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<bool> lastCardIsDiamond = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
     
+
+
 
     public struct NetworkCard : INetworkSerializable
     {
@@ -80,6 +88,9 @@ public class GameManager : NetworkBehaviour
         {
             Debug.Log(OwnerClientId + "Previous Value " + prevVal + "New value " + newVal);
         };
+
+        
+
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
         index = 0;
@@ -153,7 +164,7 @@ public class GameManager : NetworkBehaviour
 
 
     [ServerRpc(RequireOwnership = false)]
-    public void NextPlayerTestServerRpc()
+    public void NextPlayerServerRpc()
     {
         Debug.Log("Called NextPlayerTestServerRpc");
         if (index + 1 < NetworkManager.Singleton.ConnectedClientsList.Count)
