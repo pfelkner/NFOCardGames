@@ -14,10 +14,6 @@ public class Player : NetworkBehaviour
 {
     public List<Card> cardsInHand;
     [SerializeField]
-    private NetworkVariable<Values> value = new NetworkVariable<Values>();
-    [SerializeField]
-    private NetworkVariable<Colors> color = new NetworkVariable<Colors>();
-    [SerializeField]
     public List<NetworkCard> networkHand = new List<NetworkCard>();
     public GameObject cardPrefab;
 
@@ -43,7 +39,6 @@ public class Player : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
-     
     }
 
 

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -21,7 +23,6 @@ public class GameManager : NetworkBehaviour
 
     public NetworkClient currentPlayerNetworkClient;
 
-
     [Header("DeckInfo")]
     public List<Colors> colorsAvaliable;
     public List<Values> valuesAvaliable;
@@ -34,26 +35,13 @@ public class GameManager : NetworkBehaviour
     //[HideInInspector]
     public static List<Card> createdCardsList = new List<Card>();
 
-
-    public List<Card> playedCardList = new List<Card>();
-    public List<Card> lastCardPlayed = new List<Card>();
-
-
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    // 
-    public NetworkVariable<bool> lastCardIsHeart = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public NetworkVariable<bool> lastCardIsClub = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public NetworkVariable<bool> lastCardIsSpades = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public NetworkVariable<bool> lastCardIsDiamond = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
-    
-
-
+    public List<NetworkCard> networkDeck2 = new List<NetworkCard>();
 
     public struct NetworkCard : INetworkSerializable
     {
@@ -112,13 +100,7 @@ public class GameManager : NetworkBehaviour
     public void InitDeckClientRpc()
     {
         Debug.Log("Init deck called");
-        for (int i = 0; i < colorsAvaliable.Count; i++)
-        {
-            for (int j = 1; j < valuesAvaliable.Count+1; j++)
-            {
-                networkDeck.Add(new NetworkCard(i, j));
-            }
-        }
+        colorsAvaliable.ForEach(col => valuesAvaliable.ForEach( val => networkDeck2.Add(new NetworkCard((int)col,(int)val))));
     }
 
     // starts the shuffling process
@@ -171,6 +153,8 @@ public class GameManager : NetworkBehaviour
 
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
     }
+
+    //----------------------- Update round state ------------------------
 
     [ServerRpc(RequireOwnership = false)]
     public void SetLastCardServerRpc(int value)
