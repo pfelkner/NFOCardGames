@@ -9,11 +9,8 @@ public class Card : MonoBehaviour
 {
     public Colors color;
     public Values value;
-
-
    
     public Player cardOwner;
-
 
     // visuals
     public SpriteRenderer colorRenderer;
@@ -22,38 +19,23 @@ public class Card : MonoBehaviour
     private Vector2 oGPos;
     private bool isSelected;
 
-
-    
-
-
     private void OnEnable()
     {
         Invoke("SetToSprite", 1f);
-
     }
 
     private void OnMouseDown()
     {
-
-        
-
         if (!isSelected && cardOwner.IsValidCard(this))
-        {
             SelectCard();
-        }
         else if (isSelected)
-        {
             Deselect();
-        }
-
     }
     //invoked
     public void SetToSprite()
     {
-        int inx = (int)color;
-        colorRenderer.sprite = SpriteHolder.sP.colorSprites[inx];
-        inx = (int)value;
-        valueRenderer.sprite = SpriteHolder.sP.valueSprites[inx];
+        colorRenderer.sprite = SpriteHolder.sP.colorSprites[(int)color];
+        valueRenderer.sprite = SpriteHolder.sP.valueSprites[(int)value];
     }
 
     private void SelectCard()
@@ -68,13 +50,8 @@ public class Card : MonoBehaviour
     {
         transform.position = oGPos;
         isSelected = false;
-        //cardOwner.selectedCards.Remove(this);
     }
-
-
 }
-
-
 
 public enum Colors
 {

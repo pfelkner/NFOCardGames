@@ -93,10 +93,6 @@ public class GameManager : NetworkBehaviour
             UIManager.Instance.ChangeTextForPlayerInt(newVal);
         };
       
-
-
-
-
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
         lastCardPlayedValue.Value = 0;
@@ -125,8 +121,6 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-
-
     // starts the shuffling process
     public void InitShuffle()
     {
@@ -135,8 +129,6 @@ public class GameManager : NetworkBehaviour
             SetRandom();
         }
     }
-
-
 
     // Is attached to networkvariable random (of type int); on change the first card in the deck is stwiched with the card at position of the new radnom value
     [ClientRpc]
@@ -148,7 +140,6 @@ public class GameManager : NetworkBehaviour
         networkDeck[0] = temp;
     }
 
-
     // Upon being called the networkvariable (is updated across the network) random is being set to a ranadom value;
     // whenever this value changes the attacked listener triggers a method
     public void SetRandom()
@@ -156,8 +147,6 @@ public class GameManager : NetworkBehaviour
         rnd.Value = Random.Range(1, networkDeck.Count);
         Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} randomized. New value: {rnd}");
     }
-
-
 
     //----------------------- Handling player order ------------------------
 
@@ -176,14 +165,10 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Called NextPlayerTestServerRpc");
         if (index + 1 < NetworkManager.Singleton.ConnectedClientsList.Count)
-        {
             index++;
-            Debug.Log("Incrementing index to "+index);
-        } else
-        {
+        else
             index = 0;
-            Debug.Log("Resetting index to 0");
-        }
+
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
     }
 
@@ -191,18 +176,13 @@ public class GameManager : NetworkBehaviour
     public void SetLastCardServerRpc(int value)
     {
         lastCardPlayedValue.Value = value;
-       
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void SetLastAmountServerRpc(int value)
     {
         lastCardPlayedAmount.Value = value;
-       
     }
-
-
-
 }
 
 
