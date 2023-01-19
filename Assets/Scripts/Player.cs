@@ -22,7 +22,7 @@ public class Player : NetworkBehaviour
     private void OnEnable()
     {
         gameObject.name = $"Player {gM.players.Count + 1}";
-        GameManager.gM.players.Add(this);
+        GameManager.gM.AddPlayer(this);
 
     }
 
@@ -51,6 +51,7 @@ public class Player : NetworkBehaviour
             GameManager.gM.InitShuffle();
             DealCard();
             GameManager.gM.SetFirstPlayerServerRpc();
+            GameManager.gM.SetPlayerCount();
 
         }
         if (Input.GetKeyDown(KeyCode.U) && IsOwner)
@@ -179,9 +180,25 @@ public class Player : NetworkBehaviour
         return GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId;
     }
 
-    public bool hasWon()
+    public bool IsDone()
     {
         if (cardsInHand.Count == 0) return true;
         return false;
+    }
+
+
+    public Card checkHand(int wish)
+    {
+        Card tmp = null;
+        foreach (var card in cardsInHand)
+        {
+            if ((int)card.value == wish)
+            {
+                tmp = card;
+                cardsInHand.Remove(card);
+                return tmp;
+            }
+        }
+        return tmp;
     }
 }
