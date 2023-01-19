@@ -43,7 +43,7 @@ public class Card : MonoBehaviour
         }
         else if (isSelected)
         {
-            DeSelectCard();
+            Deselect();
         }
 
     }
@@ -64,11 +64,11 @@ public class Card : MonoBehaviour
         cardOwner.selectedCards.Add(this);
     }
 
-    public void DeSelectCard()
+    public void Deselect()
     {
         transform.position = oGPos;
-        cardOwner.selectedCards.Remove(this);
         isSelected = false;
+        //cardOwner.selectedCards.Remove(this);
     }
 
 

@@ -8,6 +8,7 @@ using static UnityEngine.CullingGroup;
 using static GameManager;
 using UnityEditor.PackageManager;
 using Unity.VisualScripting;
+using System.Linq;
 
 public class Player : NetworkBehaviour
 {
@@ -154,52 +155,41 @@ public class Player : NetworkBehaviour
     // btn press
     public void OnTurnEnd()
     {
-
-        if (GameManager.gM.lastCardPlayedAmount.Value == 0)
+        // alredy checked for higher only need to check if equal // Paul edit: moved this to top to avoid
+        // logical error (if two different cards were selected on first turn, lastCardAMount was being set)
+        if (!AreEqualValue() || !AreEqualCount())
         {
-            GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
-        }
-        if (selectedCards.Count == 0)
-        {
-            GameManager.gM.SetLastAmountServerRpc(0);
-        }
-
-        // alredy checked for higher only need to check if equal
-        if (!CheckCardsEqual() || selectedCards.Count != GameManager.gM.lastCardPlayedAmount.Value)
-        {
-                foreach (Card item in selectedCards)
-                {
-                    item.DeSelectCard();
-                }
-                return;
+            Debug.Log($"First if with {!AreEqualValue()} or { !AreEqualCount()}");
+            selectedCards.ForEach(card => card.Deselect()); ;
+            selectedCards.Clear();
+            return;
         }
 
+        // turn is valid; set the amount of last cards played
+        if (GameManager.gM.lastCardPlayedAmount.Value == 0) GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+
+        //player cant make a move; reset the amount of cards in middle
+        if (selectedCards.Count == 0) GameManager.gM.SetLastAmountServerRpc(0);
 
         // change network variables on server gm
-        if (IsClient && IsOwner)
+        if (IsClient && IsOwner && IsCurrentPlayer())
         {
-            if (IsCurrentPlayer())
+            // setting last card
+            if (selectedCards.Count == 0) // pass
             {
-                // setting last card
-                if (selectedCards.Count == 0) // pass
-                {
-                    GameManager.gM.SetLastAmountServerRpc(0);
-                    GameManager.gM.SetLastCardServerRpc(0); 
-                }
-                else
-                {
-                    GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
-                    GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
-                }
-                // setting new player
-                GameManager.gM.NextPlayerServerRpc();
+                GameManager.gM.SetLastAmountServerRpc(0);
+                GameManager.gM.SetLastCardServerRpc(0); 
             }
+            else
+            {
+                GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
+                GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+            }
+            // setting new player
+            GameManager.gM.NextPlayerServerRpc();
         }
         // destroy cards locally
-        foreach (Card item in selectedCards)
-        {
-            item.gameObject.SetActive(false);
-        }
+        selectedCards.ForEach(card => card.gameObject.SetActive(false));
         selectedCards.Clear();
     }
 
@@ -207,23 +197,16 @@ public class Player : NetworkBehaviour
     // ----------------------- Utils -----------------------
 
    
-    private bool CheckCardsEqual()
+    private bool AreEqualValue()
     {
-        // we have more than one card selected
-        if (selectedCards.Count > 0)
-        {   // we have more than two cards selected
-            if (selectedCards.Count > 1)
-            {
-                // the first two match
-                if (selectedCards[0].value == selectedCards[1].value)
-                {
-                    return true;
-                } // the cards are not equal -> no valid move
-                else return false;
-            } // there os only one card selected 
-           else return true;
-        }// there is no card selected but valid move 
-       else return true; 
+        return selectedCards.All(c => c.value == selectedCards[0].value);
+    }
+
+    // checks if the count is either equal to middle; also returns true if middle is empty
+    private bool AreEqualCount()
+    {
+        return selectedCards.Count == GameManager.gM.lastCardPlayedAmount.Value
+            || GameManager.gM.lastCardPlayedAmount.Value == 0;
     }
 
     private void LogCards()

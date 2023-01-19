@@ -99,6 +99,7 @@ public class GameManager : NetworkBehaviour
 
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
+        lastCardPlayedValue.Value = 0;
         index = 0;
     }
 
