@@ -41,14 +41,10 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     
-
-
-
     public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
-    //public List<NetworkCard> networkDeck2 = new List<NetworkCard>();
 
     IDictionary<int, ulong> placements = new Dictionary<int, ulong>();
 
@@ -77,18 +73,18 @@ public class GameManager : NetworkBehaviour
     public struct NetworkColors : INetworkSerializable
     {
 
-        public NetworkColors(int col, int col2, int col3, int col4)
+        public NetworkColors(bool cl, bool sp, bool he, bool di)
         {
-            club = col;
-            spade = col2;
-            heart = col3;
-            diamond = col4;
+            club = cl;
+            spade = sp;
+            heart = he;
+            diamond = di;
         }
 
-        public int club;
-        public int spade;
-        public int heart;
-        public int diamond;
+        public bool club;
+        public bool spade;
+        public bool heart;
+        public bool diamond;
 
 
 
@@ -233,11 +229,11 @@ public class GameManager : NetworkBehaviour
     //    }
     //}
     [ServerRpc(RequireOwnership =false)]
-    public void HandleCardsToSpwawnServerRpc(NetworkColors netCol)
+    public void HandleCardsToSpwawnServerRpc(NetworkColors cols)
     {
         Debug.LogWarning("HandleCardsClient");
         SpriteHolder.sP.SetCardsBackClientRpc();
-        SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, netCol);
+        SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, cols);
     }
 
 

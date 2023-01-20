@@ -9,6 +9,7 @@ using static GameManager;
 using UnityEditor.PackageManager;
 using Unity.VisualScripting;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 
 public class Player : NetworkBehaviour
 {
@@ -186,13 +187,7 @@ public class Player : NetworkBehaviour
             {
                 GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
                 GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
-                NetworkColors cols = new NetworkColors();
-                for (int i = 0; i < selectedCards.Count; i++)
-                {
-                    //
-                }
-                
-              //  GameManager.gM.HandleCardsToSpwawnServerRpc(new Colors());
+                GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
             }
             // setting new player
             GameManager.gM.NextPlayerServerRpc();
@@ -200,13 +195,53 @@ public class Player : NetworkBehaviour
         // destroy cards locally
         selectedCards.ForEach(card => card.gameObject.SetActive(false));
         selectedCards.Clear();
-
-   
-       
     }
 
-
     // ----------------------- Utils -----------------------
+
+    private NetworkColors GetSelectedColors(List<Card> _cards)
+    {
+        NetworkColors cols = new NetworkColors();
+        for (int i = 0; i < _cards.Count; i++)
+        {
+            switch (_cards[i].color)
+            {
+                case Colors.club:
+                    cols.club = true;
+                    break;
+                case Colors.spade:
+                    cols.spade = true;
+                    break;
+                case Colors.heart:
+                    cols.heart = true;
+                    break;
+                case Colors.diamond:
+                    cols.diamond = true;
+                    break;
+            }
+        }
+        return cols;
+    }
+
+    private void SetNetworkColors (Colors _col, NetworkColors _ncols)
+    {
+        switch (_col)
+        {
+            case Colors.club:
+                _ncols.club = true;
+                break;
+            case Colors.spade:
+                _ncols.spade = true;
+                break;
+            case Colors.heart:
+                _ncols.heart = true;
+                break;
+            case Colors.diamond:
+                _ncols.diamond = true;
+                break;
+        }
+        //return _ncols;
+    }
 
    
     private bool AreEqualValue()
