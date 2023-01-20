@@ -19,6 +19,8 @@ public class Card : MonoBehaviour
     private Vector2 oGPos;
     private bool isSelected;
 
+    public bool isPlayed;
+
     private void OnEnable()
     {
         Invoke("SetToSprite", 1f);
@@ -26,6 +28,8 @@ public class Card : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (isPlayed) return;
+
         if (!isSelected && cardOwner.IsValidCard(this))
             SelectCard();
         else if (isSelected)
@@ -37,6 +41,8 @@ public class Card : MonoBehaviour
         colorRenderer.sprite = SpriteHolder.sP.colorSprites[(int)color];
         valueRenderer.sprite = SpriteHolder.sP.valueSprites[(int)value];
     }
+
+ 
 
     private void SelectCard()
     {

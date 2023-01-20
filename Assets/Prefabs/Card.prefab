@@ -70,15 +70,15 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingLayerID: -1414837991
+  m_SortingLayer: 1
+  m_SortingOrder: 1
   m_Sprite: {fileID: 0}
   m_Color: {r: 0.8018868, g: 0.78066754, b: 0.7073247, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3.2, y: 3.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -154,15 +154,15 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1414837991
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: e001bd0095eeed74281d93ec8d468b4f, type: 3}
   m_Color: {r: 0.8018868, g: 0.78066754, b: 0.7073247, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3.2, y: 3.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -217,10 +217,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   color: 0
-  value: 0
+  value: 4
   cardOwner: {fileID: 0}
   colorRenderer: {fileID: 2851280253071054387}
   valueRenderer: {fileID: 2529044591812274560}
+  isPlayed: 0
 --- !u!61 &4491089779999730517
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -317,15 +318,15 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingLayerID: -1414837991
+  m_SortingLayer: 1
+  m_SortingOrder: 1
   m_Sprite: {fileID: 0}
   m_Color: {r: 0.8018868, g: 0.78066754, b: 0.7073247, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.4, y: 0.5}
+  m_Size: {x: 2.8, y: 2.4}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0

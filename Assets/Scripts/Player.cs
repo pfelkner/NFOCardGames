@@ -150,6 +150,13 @@ public class Player : NetworkBehaviour
     // btn press
     public void OnTurnEnd()
     {
+        if (selectedCards.Count == 0) 
+        { 
+            GameManager.gM.SetLastAmountServerRpc(0);
+            GameManager.gM.SetLastCardServerRpc(0);
+            GameManager.gM.NextPlayerServerRpc();
+        }
+
         // alredy checked for higher only need to check if equal // Paul edit: moved this to top to avoid
         // logical error (if two different cards were selected on first turn, lastCardAMount was being set)
         if (!AreEqualValue() || !AreEqualCount())
@@ -179,6 +186,13 @@ public class Player : NetworkBehaviour
             {
                 GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
                 GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+                NetworkColors cols = new NetworkColors();
+                for (int i = 0; i < selectedCards.Count; i++)
+                {
+                    //
+                }
+                
+              //  GameManager.gM.HandleCardsToSpwawnServerRpc(new Colors());
             }
             // setting new player
             GameManager.gM.NextPlayerServerRpc();
@@ -186,6 +200,9 @@ public class Player : NetworkBehaviour
         // destroy cards locally
         selectedCards.ForEach(card => card.gameObject.SetActive(false));
         selectedCards.Clear();
+
+   
+       
     }
 
 

@@ -1398,8 +1398,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1482590341}
-  - component: {fileID: 1482590340}
   - component: {fileID: 1482590339}
+  - component: {fileID: 1482590342}
   m_Layer: 0
   m_Name: NetWorkManager
   m_TagString: Untagged
@@ -1434,7 +1434,22 @@ MonoBehaviour:
     PacketDelayMS: 0
     PacketJitterMS: 0
     PacketDropRate: 0
---- !u!114 &1482590340
+--- !u!4 &1482590341
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1482590338}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1482590342
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1447,7 +1462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RunInBackground: 1
-  LogLevel: 0
+  LogLevel: 1
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1482590339}
@@ -1478,21 +1493,6 @@ MonoBehaviour:
     LoadSceneTimeOut: 120
     SpawnTimeout: 1
     EnableNetworkLogs: 1
---- !u!4 &1482590341
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1482590338}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1537888027
 GameObject:
   m_ObjectHideFlags: 0
@@ -1637,6 +1637,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1556018285}
   - component: {fileID: 1556018284}
+  - component: {fileID: 1556018286}
   m_Layer: 0
   m_Name: SpriteHolder
   m_TagString: Untagged
@@ -1672,6 +1673,10 @@ MonoBehaviour:
   - {fileID: 411428638, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: 1144771790, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: -1811959245, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
+  cardInMiddle: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
+  cardsAmount: 0
+  cardsValue: 0
+  goS: []
 --- !u!4 &1556018285
 Transform:
   m_ObjectHideFlags: 0
@@ -1679,7 +1684,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1556018283}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1687,6 +1692,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1556018286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556018283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3419524970
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &1795961381
 GameObject:
   m_ObjectHideFlags: 0

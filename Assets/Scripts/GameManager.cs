@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using Unity.Netcode;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -38,11 +40,15 @@ public class GameManager : NetworkBehaviour
 
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    
+
+
+
     public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
-    public List<NetworkCard> networkDeck2 = new List<NetworkCard>();
+    //public List<NetworkCard> networkDeck2 = new List<NetworkCard>();
 
     IDictionary<int, ulong> placements = new Dictionary<int, ulong>();
 
@@ -68,6 +74,34 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    public struct NetworkColors : INetworkSerializable
+    {
+
+        public NetworkColors(int col, int col2, int col3, int col4)
+        {
+            club = col;
+            spade = col2;
+            heart = col3;
+            diamond = col4;
+        }
+
+        public int club;
+        public int spade;
+        public int heart;
+        public int diamond;
+
+
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref club);
+            serializer.SerializeValue(ref spade);
+            serializer.SerializeValue(ref heart);
+            serializer.SerializeValue(ref diamond);
+        }
+
+    }
+
     private void Awake()
     {
         if (gM == null) gM = this;
@@ -78,10 +112,12 @@ public class GameManager : NetworkBehaviour
         lastCardPlayedValue.OnValueChanged += (int prevVal, int newVal) =>
         {
             UIManager.Instance.ChangeTextForPlayerValue((Values)newVal);
+            SpriteHolder.sP.cardsValue = newVal;
         };
         lastCardPlayedAmount.OnValueChanged += (int prevVal, int newVal) =>
         {
             UIManager.Instance.ChangeTextForPlayerInt(newVal);
+            SpriteHolder.sP.cardsAmount = newVal;
         };
       
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
@@ -103,7 +139,7 @@ public class GameManager : NetworkBehaviour
     public void InitDeckClientRpc()
     {
         Debug.Log("Init deck called");
-        colorsAvaliable.ForEach(col => valuesAvaliable.ForEach( val => networkDeck2.Add(new NetworkCard((int)col,(int)val))));
+        colorsAvaliable.ForEach(col => valuesAvaliable.ForEach( val => networkDeck.Add(new NetworkCard((int)col,(int)val))));
     }
 
     // starts the shuffling process
@@ -196,6 +232,13 @@ public class GameManager : NetworkBehaviour
     //            break;
     //    }
     //}
+    [ServerRpc(RequireOwnership =false)]
+    public void HandleCardsToSpwawnServerRpc(NetworkColors netCol)
+    {
+        Debug.LogWarning("HandleCardsClient");
+        SpriteHolder.sP.SetCardsBackClientRpc();
+        SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, netCol);
+    }
 
 
     public void EndTurn(Player player)
@@ -269,7 +312,7 @@ public class GameManager : NetworkBehaviour
         RequestCardsClientRpc(wish1, wish2, senderId, TargetId(targetId));
     }
 
-
+    [ClientRpc]
     private void RequestCardsClientRpc(int wish1, int wish2, ulong senderId, ClientRpcParams clientRpcParams)
     {
         Card card1 = localPlayer.checkHand(wish1);
@@ -282,7 +325,7 @@ public class GameManager : NetworkBehaviour
         GiveCardsClientRpc(c1, c2, TargetId(senderId));
     }
 
-
+    [ClientRpc]
     private void RequestCardsClientRpc(int wish, ulong senderId, ClientRpcParams clientRpcParams)
     {
         Card card1 = localPlayer.checkHand(wish);
@@ -314,7 +357,6 @@ public class GameManager : NetworkBehaviour
         if (player.IsLocalPlayer)
             localPlayer = player;
     }
-
     private ClientRpcParams TargetId(ulong id)
     {
         return new ClientRpcParams
