@@ -15,6 +15,9 @@ public class Card : MonoBehaviour
     // visuals
     public SpriteRenderer colorRenderer;
     public SpriteRenderer valueRenderer;
+    public SpriteRenderer cardRenderer;
+
+
 
     private Vector2 oGPos;
     private bool isSelected;
@@ -23,7 +26,7 @@ public class Card : MonoBehaviour
 
     private void OnEnable()
     {
-        Invoke("SetToSprite", 1f);
+        Invoke("SetToSprite", 0.3f);
     }
 
     private void OnMouseDown()
@@ -38,8 +41,12 @@ public class Card : MonoBehaviour
     //invoked
     public void SetToSprite()
     {
+        cardRenderer.enabled = true;
         colorRenderer.sprite = SpriteHolder.sP.colorSprites[(int)color];
         valueRenderer.sprite = SpriteHolder.sP.valueSprites[(int)value];
+
+
+
     }
 
  

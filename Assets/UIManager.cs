@@ -19,6 +19,9 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI cardTOBeatText;
     public TextMeshProUGUI amountToBeat;
 
+    public TextMeshProUGUI isCurrentPlayerText;
+    public TextMeshProUGUI endText;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -56,5 +59,19 @@ public class UIManager : MonoBehaviour
     {
         amountToBeat.text = amount.ToString();
     }
+
+
+    public void SetIsCurrentPlayerText(bool _flag)
+    {
+        if (_flag)
+            isCurrentPlayerText.text = "Your Turn";
+        else
+            isCurrentPlayerText.text = "";
+    }
+    public void SetEndText(string _txt)
+    {
+        endText.text = _txt;
+    }
+
 
 }

@@ -48,6 +48,7 @@ public class GameManager : NetworkBehaviour
 
     IDictionary<int, ulong> placements = new Dictionary<int, ulong>();
 
+    public List<Player> playersFinished = new List<Player>();
     public struct NetworkCard : INetworkSerializable
     {
         public NetworkCard(int col, int val) {
@@ -237,25 +238,21 @@ public class GameManager : NetworkBehaviour
     }
 
 
-    public void EndTurn(Player player)
-    {
-        if (player.IsDone())
-        {
-            //placement.Value = playerCount - players.Count;
-            placements.Add((playerCount - players.Count), currentPlayerId.Value);
-            players.Remove(player);
-        }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void IsEndTurnServerRpc()
+    {
+        
+       
         if (IsGameOver())
         {
-            //make players exchange cards
-
+            UIManager.Instance.SetEndText($"{playersFinished[0]} wins");
         }
     }
 
     private bool IsGameOver()
     {
-        return players.Count == 0;
+        return players.Count <= 1;
     }
 
     public void SetPlayerCount()

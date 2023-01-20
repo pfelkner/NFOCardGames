@@ -20,11 +20,15 @@ public class Player : NetworkBehaviour
 
     public List<Card> selectedCards = new List<Card>();
 
+    public int cardsInHandCounter;
+
     private void OnEnable()
     {
         gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
         UIManager.Instance.endTurnBtn.onClick.AddListener(OnTurnEnd);
+
+        cardsInHandCounter = GameManager.gM.maximumCardsInHand;
     }
 
     private void OnDisable()
@@ -45,6 +49,9 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
+        UIManager.Instance.SetIsCurrentPlayerText(IsCurrentPlayer());
+           
+
         // testing
         if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
@@ -75,9 +82,10 @@ public class Player : NetworkBehaviour
     private void SpawnCardsClientRpc()
     {
         float spacing = 0f;
-
+        List<NetworkCard> newHand = networkHand.OrderBy(card => card.value).ToList();
+        newHand.ForEach(card => Debug.LogWarning(card));
         // crate cards locally
-        foreach (NetworkCard networkCard in networkHand)
+        foreach (NetworkCard networkCard in newHand)
         {
             GameObject go = Instantiate(cardPrefab, new Vector2(-10f, -10f), Quaternion.identity);
             Card currentCard = go.GetComponent<Card>();
@@ -91,6 +99,7 @@ public class Player : NetworkBehaviour
             cardsInHand.Add(currentCard);
             spacing++;
         }
+       
         SpriteHolder.sP.SetSpritesPosition(this);
     }
 
@@ -144,57 +153,54 @@ public class Player : NetworkBehaviour
 
     public bool IsValidCard(Card card)
     {
-        return (int)card.value > GameManager.gM.lastCardPlayedValue.Value;
+        return (int)card.value > GameManager.gM.lastCardPlayedValue.Value || HansBomb();
         
+    }
+    public bool HansBomb()
+    {
+        return cardsInHand.GroupBy(x => x.value).Any(g => g.Count() > 3);
     }
 
     // btn press
     public void OnTurnEnd()
     {
-        if (selectedCards.Count == 0) 
-        { 
+        if (!IsClient || !IsOwner || !IsCurrentPlayer()) return;
+
+
+        if (selectedCards.Count == 0) // pass
+        {
             GameManager.gM.SetLastAmountServerRpc(0);
             GameManager.gM.SetLastCardServerRpc(0);
             GameManager.gM.NextPlayerServerRpc();
+            return;
         }
 
         // alredy checked for higher only need to check if equal // Paul edit: moved this to top to avoid
         // logical error (if two different cards were selected on first turn, lastCardAMount was being set)
-        if (!AreEqualValue() || !AreEqualCount())
+        if ((!AreEqualValue() || !AreEqualCount())&& !HansBomb())
         {
+              
             Debug.Log($"First if with {!AreEqualValue()} or { !AreEqualCount()}");
             selectedCards.ForEach(card => card.Deselect()); ;
             selectedCards.Clear();
             return;
-        }
-
-        // turn is valid; set the amount of last cards played
-        if (GameManager.gM.lastCardPlayedAmount.Value == 0) GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
-
-        //player cant make a move; reset the amount of cards in middle
-        if (selectedCards.Count == 0) GameManager.gM.SetLastAmountServerRpc(0);
-
-        // change network variables on server gm
-        if (IsClient && IsOwner && IsCurrentPlayer())
+           
+        }   
+        else
         {
-            // setting last card
-            if (selectedCards.Count == 0) // pass
-            {
-                GameManager.gM.SetLastAmountServerRpc(0);
-                GameManager.gM.SetLastCardServerRpc(0); 
-            }
-            else
-            {
-                GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
-                GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
-                GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
-            }
-            // setting new player
-            GameManager.gM.NextPlayerServerRpc();
+            GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
+            GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+            GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
         }
+        // setting new player
+        GameManager.gM.NextPlayerServerRpc();
         // destroy cards locally
+        // remove card so the game logic knows when player ready
+        cardsInHandCounter-= selectedCards.Count;
         selectedCards.ForEach(card => card.gameObject.SetActive(false));
         selectedCards.Clear();
+        
+
     }
 
     // ----------------------- Utils -----------------------
@@ -283,7 +289,7 @@ public class Player : NetworkBehaviour
 
     public bool IsDone()
     {
-        if (cardsInHand.Count == 0) return true;
+        if (cardsInHandCounter <= 0) return true;
         return false;
     }
 

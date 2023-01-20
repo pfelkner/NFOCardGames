@@ -19,6 +19,9 @@ public class SpriteHolder : NetworkBehaviour
 
     public List<GameObject> goS;
 
+    [Range(0,3)]
+    public float spacing;
+
     private void Awake()
     {
         if (sP == null) sP = this;   
@@ -66,8 +69,14 @@ public class SpriteHolder : NetworkBehaviour
         List<Colors> test = ParseNetworkCols(col);
         for (int i = 0; i < amount; i++)
         {   
-            GameObject go = Instantiate(cardInMiddle, new Vector2(7.4f+i+0.5f, 4f), Quaternion.identity);
+            GameObject go = Instantiate(cardInMiddle, new Vector2(4.4f+i+spacing+(Random.Range(0.5f,0.5f)), 4f+(Random.Range(-0.3f, 0.5f))), Quaternion.Euler(0.0f, 0.0f, Random.Range(-10f, 10f)));
             Card card = go.GetComponent<Card>();
+
+            card.valueRenderer.sortingOrder -= i;
+            card.colorRenderer.sortingOrder -= i;
+            card.cardRenderer.sortingOrder -= i;
+
+            card.isPlayed = true;
 
             card.color = test[i];
            
