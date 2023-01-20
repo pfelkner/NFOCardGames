@@ -16,8 +16,9 @@ public class GameManager : NetworkBehaviour
     public GameObject deckGO;
 
     public List<Player> players;
-    public Player currentPlayer;
+    public Player localPlayer;
     int index;
+    int playerCount;
 
     public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
@@ -42,6 +43,8 @@ public class GameManager : NetworkBehaviour
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
     public List<NetworkCard> networkDeck2 = new List<NetworkCard>();
+
+    IDictionary<int, ulong> placements = new Dictionary<int, ulong>();
 
     public struct NetworkCard : INetworkSerializable
     {
@@ -167,6 +170,159 @@ public class GameManager : NetworkBehaviour
     {
         lastCardPlayedAmount.Value = value;
     }
+
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    //----------------------- Game/Round End  ------------------------
+
+    //[ServerRpc(RequireOwnership = false)]
+    //public void SetWinnerServerRpc(ulong id, int placement)
+    //{
+    //    switch (placement)
+    //    {
+    //        case 1:
+    //            presiId.Value = id;
+    //            break;
+    //        case 2:
+    //            vizePId.Value = id;
+    //            break;
+    //        case 3:
+    //            vizeIAd.Value = id;
+    //            break;
+    //        case 4:
+    //            arschId.Value = id;
+    //            break;
+    //        default:
+    //            // code block
+    //            break;
+    //    }
+    //}
+
+
+    public void EndTurn(Player player)
+    {
+        if (player.IsDone())
+        {
+            //placement.Value = playerCount - players.Count;
+            placements.Add((playerCount - players.Count), currentPlayerId.Value);
+            players.Remove(player);
+        }
+
+        if (IsGameOver())
+        {
+            //make players exchange cards
+
+        }
+    }
+
+    private bool IsGameOver()
+    {
+        return players.Count == 0;
+    }
+
+    public void SetPlayerCount()
+    {
+        playerCount = players.Count;
+    }
+
+    [ServerRpc]
+    private void ResetServerRpc()
+    {
+        placements.Clear();
+        lastCardPlayedValue.Value = 0;
+    }
+
+    [ServerRpc]
+    private void RewardWinnersServerRpc()
+    {
+        //get first place from placements
+        // ask winner what they wish for
+        // request cards from target
+        // give cards to current place from placements
+        // return card/s to target
+        //---------- presi----------
+        ulong winnerId = placements[1];
+        ulong arschId = placements.Values.Last();
+        GetWishClientRpc(arschId, winnerId, TargetId(winnerId));
+
+
+        //---------- vize ----------
+        ulong vizeId = placements[2];
+    }
+
+    [ClientRpc]
+    private void GetWishClientRpc(ulong targetId, ulong senderId, ClientRpcParams rpcParams)
+    {
+        // ask for two cards (select via mouse click)
+        // then confirm choice via button
+        // requesting cards by picking them and submitting your choice should ideally be its own scene,
+        // as this differs greatly from the game scene but in itself is very much alike for all players
+        int wish1 = 9; // ace
+        int wish2 = 8; // king
+
+
+        SubmitWishServerRpc(wish1, wish2, targetId, senderId);
+    }
+
+    [ServerRpc]
+    private void SubmitWishServerRpc(int wish1, int wish2, ulong targetId, ulong senderId)
+    {
+        RequestCardsClientRpc(wish1, wish2, senderId, TargetId(targetId));
+    }
+
+
+    private void RequestCardsClientRpc(int wish1, int wish2, ulong senderId, ClientRpcParams clientRpcParams)
+    {
+        Card card1 = localPlayer.checkHand(wish1);
+        Card card2 = localPlayer.checkHand(wish2);
+
+        NetworkCard c1 = new NetworkCard((int)card1.color, (int)card1.value);
+        NetworkCard c2 = new NetworkCard((int)card2.color, (int)card2.value);
+
+        // TODO check here if maybe we need to send the cards to the server first, to send it to the clients
+        GiveCardsClientRpc(c1, c2, TargetId(senderId));
+    }
+
+
+    private void RequestCardsClientRpc(int wish, ulong senderId, ClientRpcParams clientRpcParams)
+    {
+        Card card1 = localPlayer.checkHand(wish);
+
+        NetworkCard nc = new NetworkCard((int)card1.color, (int)card1.value);
+
+        // TODO check here if maybe we need to send the cards to the server first, to send it to the clients
+        GiveCardsClientRpc(nc, TargetId(senderId));
+    }
+
+    [ClientRpc]
+    private void GiveCardsClientRpc(NetworkCard nc, ClientRpcParams clientRpcParams)
+    {
+        // call a function in player to instantiate cards
+        // return card to the one wh gave a card
+    }
+
+    [ClientRpc]
+    private void GiveCardsClientRpc(NetworkCard c1, NetworkCard c2, ClientRpcParams clientRpcParams)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void AddPlayer(Player player)
+    {
+        //TODO check via debug if the local player assignmenet works
+        Debug.Log($"Player {player.name} is local player: {player.IsLocalPlayer}");
+        players.Add(player);
+        if (player.IsLocalPlayer)
+            localPlayer = player;
+    }
+
+    private ClientRpcParams TargetId(ulong id)
+    {
+        return new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { id } }
+        };
+    }
+
 }
 
 
