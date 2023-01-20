@@ -202,9 +202,9 @@ public class Player : NetworkBehaviour
     private NetworkColors GetSelectedColors(List<Card> _cards)
     {
         NetworkColors cols = new NetworkColors();
-        for (int i = 0; i < _cards.Count; i++)
+        foreach (Card card  in _cards)
         {
-            switch (_cards[i].color)
+            switch (card.color)
             {
                 case Colors.club:
                     cols.club = true;
@@ -222,27 +222,6 @@ public class Player : NetworkBehaviour
         }
         return cols;
     }
-
-    private void SetNetworkColors (Colors _col, NetworkColors _ncols)
-    {
-        switch (_col)
-        {
-            case Colors.club:
-                _ncols.club = true;
-                break;
-            case Colors.spade:
-                _ncols.spade = true;
-                break;
-            case Colors.heart:
-                _ncols.heart = true;
-                break;
-            case Colors.diamond:
-                _ncols.diamond = true;
-                break;
-        }
-        //return _ncols;
-    }
-
    
     private bool AreEqualValue()
     {
