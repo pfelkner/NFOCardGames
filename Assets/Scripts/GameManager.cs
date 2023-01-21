@@ -172,7 +172,6 @@ public class GameManager : NetworkBehaviour
         currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
     }
 
-
     [ServerRpc(RequireOwnership = false)]
     public void NextPlayerServerRpc()
     {
@@ -183,10 +182,14 @@ public class GameManager : NetworkBehaviour
 
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
 
-        if (NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(currentPlayerId.Value).gameObject.GetComponent<Player>().IsDone())
+        Player player = GetPlayerById(currentPlayerId.Value);
+        if (player.IsDone())
         {
+            players.Remove(player);
             NextPlayerServerRpc();
         }
+        //if (IsGameOver())
+
     }
 
     //----------------------- Update round state ------------------------
@@ -353,6 +356,14 @@ public class GameManager : NetworkBehaviour
         {
             Send = new ClientRpcSendParams { TargetClientIds = new ulong[] { id } }
         };
+    }
+
+
+    //Utils
+
+    public static Player GetPlayerById(ulong id)
+    {
+        return NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Player>();
     }
 
 }

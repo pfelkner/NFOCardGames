@@ -109,7 +109,7 @@ public class Player : NetworkBehaviour
         }
         foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
         {
-            NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().SpawnCardsClientRpc();
+            GameManager.GetPlayerById(uid).SpawnCardsClientRpc();
            
         }        
     }
@@ -160,7 +160,7 @@ public class Player : NetworkBehaviour
         if (!IsClient || !IsOwner || !IsCurrentPlayer()) return;
 
 
-        if (selectedCards.Count == 0) // pass
+        if (selectedCards.Count == 0 || IsDone()) // pass
         {
             GameManager.gM.SetLastAmountServerRpc(0);
             GameManager.gM.SetLastCardServerRpc(0);
@@ -168,8 +168,7 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        // alredy checked for higher only need to check if equal // Paul edit: moved this to top to avoid
-        // logical error (if two different cards were selected on first turn, lastCardAMount was being set)
+        // alredy checked for higher only need to check if equal
         if ((!AreEqualValue() || !AreEqualCount())&& !HansBomb())
         {
             selectedCards.ForEach(card => card.Deselect()); ;
