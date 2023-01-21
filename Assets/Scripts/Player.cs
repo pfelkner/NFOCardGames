@@ -158,6 +158,7 @@ public class Player : NetworkBehaviour
     }
     public bool HansBomb()
     {
+        Debug.Log($"Hans Bomb is {cardsInHand.GroupBy(x => x.value).Any(g => g.Count() > 3)}");
         return cardsInHand.GroupBy(x => x.value).Any(g => g.Count() > 3);
     }
 
@@ -180,7 +181,7 @@ public class Player : NetworkBehaviour
         if ((!AreEqualValue() || !AreEqualCount())&& !HansBomb())
         {
               
-            Debug.Log($"First if with {!AreEqualValue()} or { !AreEqualCount()}");
+            Debug.LogWarning($"First if with {!AreEqualValue()} or { !AreEqualCount()} and {!HansBomb()}");
             selectedCards.ForEach(card => card.Deselect()); ;
             selectedCards.Clear();
             return;

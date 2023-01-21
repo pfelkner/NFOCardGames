@@ -246,7 +246,7 @@ public class GameManager : NetworkBehaviour
        
         if (IsGameOver())
         {
-            UIManager.Instance.SetEndText($"{playersFinished[0]} wins");
+            //UIManager.Instance.SetEndText($"{playersFinished[0]} wins");
         }
     }
 
