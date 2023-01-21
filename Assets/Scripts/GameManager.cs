@@ -49,6 +49,7 @@ public class GameManager : NetworkBehaviour
     IDictionary<int, ulong> placements = new Dictionary<int, ulong>();
 
     public List<Player> playersFinished = new List<Player>();
+
     public struct NetworkCard : INetworkSerializable
     {
         public NetworkCard(int col, int val) {
@@ -168,8 +169,16 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void SetFirstPlayerServerRpc()
     {
-        currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
-        currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
+        if (placements.Count == 0)
+        {
+            // TODO first round: lowest heart, not host
+            currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
+            currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
+        } else
+        {
+            // whoever came in last place takes first turn
+            currentPlayerId.Value = placements[placements.Count];
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -251,7 +260,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private bool IsGameOver()
+    public bool IsGameOver()
     {
         return players.Count <= 1;
     }
@@ -359,12 +368,32 @@ public class GameManager : NetworkBehaviour
     }
 
 
+    internal void PrepareNextGame()
+    {
+        // maybe check connected clients here or make sure to remove from players on disconnect
+        playerCount = players.Count();
+        lastCardPlayedValue.Value = 0;
+        lastCardPlayedAmount.Value = 0;
+
+        InitShuffle();
+        //arschloch mischt
+        GetPlayerById(currentPlayerId.Value).DealCards();
+        SetFirstPlayerServerRpc();
+    }
+
     //Utils
 
     public static Player GetPlayerById(ulong id)
     {
         return NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Player>();
     }
+
+    public void SetPlacement()
+    {
+        int placement = placements.Count + 1;
+        placements.Add(placement, currentPlayerId.Value);
+    }
+
 
 }
 

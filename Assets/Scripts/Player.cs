@@ -57,7 +57,7 @@ public class Player : NetworkBehaviour
         {
             GameManager.gM.InitDeckClientRpc();
             GameManager.gM.InitShuffle();
-            DealCard();
+            DealCards();
             GameManager.gM.SetFirstPlayerServerRpc();
 
         }
@@ -101,7 +101,7 @@ public class Player : NetworkBehaviour
         SpriteHolder.sP.SetSpritesPosition(this);
     }
 
-    private void DealCard()
+    internal void DealCards()
     {
         if (IsOwner)
         {
@@ -185,17 +185,26 @@ public class Player : NetworkBehaviour
             GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
             SoundManager.Instance.PlaySound();
         }
-        // setting new player
-        GameManager.gM.NextPlayerServerRpc();
         // destroy cards locally
         // remove card so the game logic knows when player ready
         cardsInHandCounter-= selectedCards.Count;
         if (IsDone())
-            SpriteHolder.sP.SetWinLooseImageClientRpc();
+        {
+            //SpriteHolder.sP.SetWinLooseImageClientRpc();
+            GameManager.gM.SetPlacement();
+        }
         selectedCards.ForEach(card => card.gameObject.SetActive(false));
         selectedCards.Clear();
         
 
+        if (GameManager.gM.IsGameOver())
+        {
+            GameManager.gM.PrepareNextGame();
+            return;
+        }
+
+        // setting new player
+        GameManager.gM.NextPlayerServerRpc();
     }
 
     // ----------------------- Utils -----------------------
