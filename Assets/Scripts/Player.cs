@@ -165,6 +165,7 @@ public class Player : NetworkBehaviour
             GameManager.gM.SetLastAmountServerRpc(0);
             GameManager.gM.SetLastCardServerRpc(0);
             GameManager.gM.NextPlayerServerRpc();
+            SoundManager.Instance.CheckSound();
             return;
         }
 
@@ -173,6 +174,7 @@ public class Player : NetworkBehaviour
         {
             selectedCards.ForEach(card => card.Deselect()); ;
             selectedCards.Clear();
+            SoundManager.Instance.CancelSound();
             return;
            
         }   
@@ -181,12 +183,15 @@ public class Player : NetworkBehaviour
             GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
             GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
             GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
+            SoundManager.Instance.PlaySound();
         }
         // setting new player
         GameManager.gM.NextPlayerServerRpc();
         // destroy cards locally
         // remove card so the game logic knows when player ready
         cardsInHandCounter-= selectedCards.Count;
+        if (IsDone())
+            SpriteHolder.sP.SetWinLooseImageClientRpc();
         selectedCards.ForEach(card => card.gameObject.SetActive(false));
         selectedCards.Clear();
         

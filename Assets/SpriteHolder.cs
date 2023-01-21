@@ -19,8 +19,13 @@ public class SpriteHolder : NetworkBehaviour
 
     public List<GameObject> goS;
 
+    public List<Sprite> winLooseImageSprites;
+    public SpriteRenderer winLooseImage;
+
     [Range(0,3)]
     public float spacing;
+
+    public NetworkVariable<int> winnerCounter = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private void Awake()
     {
@@ -96,5 +101,11 @@ public class SpriteHolder : NetworkBehaviour
         goS.Clear();
     }
 
+    [ClientRpc]
+    public void SetWinLooseImageClientRpc()
+    {
+        winLooseImage.sprite = winLooseImageSprites[winnerCounter.Value];
+        winnerCounter.Value++;
+    }
 
 } //

@@ -22,6 +22,10 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI isCurrentPlayerText;
     public TextMeshProUGUI endText;
 
+    public Image frameImage;
+    public Color frameColorTurn;
+    public Color frameColorNoTurn;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -64,9 +68,19 @@ public class UIManager : MonoBehaviour
     public void SetIsCurrentPlayerText(bool _flag)
     {
         if (_flag)
+        {
             isCurrentPlayerText.text = "Your Turn";
+            frameImage.color = frameColorTurn;
+        }
+
         else
+        {
             isCurrentPlayerText.text = "";
+            frameImage.color = frameColorNoTurn;
+        }
+            
+
+
     }
     public void SetEndText(string _txt)
     {
