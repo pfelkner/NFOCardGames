@@ -182,6 +182,11 @@ public class GameManager : NetworkBehaviour
             index = 0;
 
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
+
+        if (NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(currentPlayerId.Value).gameObject.GetComponent<Player>().IsDone())
+        {
+            NextPlayerServerRpc();
+        }
     }
 
     //----------------------- Update round state ------------------------
