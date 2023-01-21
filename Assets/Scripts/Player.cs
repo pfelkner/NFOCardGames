@@ -56,7 +56,6 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
             GameManager.gM.InitDeckClientRpc();
-            Debug.Log(networkHand.Count + " cards have been created.");
             GameManager.gM.InitShuffle();
             DealCard();
             GameManager.gM.SetFirstPlayerServerRpc();
@@ -83,7 +82,6 @@ public class Player : NetworkBehaviour
     {
         float spacing = 0f;
         List<NetworkCard> newHand = networkHand.OrderBy(card => card.value).ToList();
-        newHand.ForEach(card => Debug.LogWarning(card));
         // crate cards locally
         foreach (NetworkCard networkCard in newHand)
         {
@@ -123,16 +121,13 @@ public class Player : NetworkBehaviour
         //foreach (var clientid in NetworkManager.Singleton.ConnectedClientsIds)
         foreach (Player player in GameManager.gM.players)
         {
-            Debug.Log($"Player with Id {player} is dealt cards");
-
+            
             for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
             {
-                Debug.Log($"Player with Id {player.NetworkObjectId} received a {GameManager.gM.networkDeck[deckIndex].ToString()}");
                 player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
                 deckIndex++;
 
             }
-            Debug.Log($"Player with Id {player} has now {networkHand.Count} cards in hand");
         }
     }
 
@@ -141,8 +136,6 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void StartTurnClientRpc(ulong previousValue, ulong newValue)
     {
-        //Debug.Log($"SetCurrentPlayerClientRpc: previous: {previousValue}, new: {newValue}");
-        
         if (newValue == NetworkManager.Singleton.LocalClientId)
         {
             Debug.Log($"Player {newValue} is now current Player");
@@ -158,7 +151,6 @@ public class Player : NetworkBehaviour
     }
     public bool HansBomb()
     {
-        Debug.Log($"Hans Bomb is {cardsInHand.GroupBy(x => x.value).Any(g => g.Count() > 3)}");
         return cardsInHand.GroupBy(x => x.value).Any(g => g.Count() > 3);
     }
 
@@ -180,8 +172,6 @@ public class Player : NetworkBehaviour
         // logical error (if two different cards were selected on first turn, lastCardAMount was being set)
         if ((!AreEqualValue() || !AreEqualCount())&& !HansBomb())
         {
-              
-            Debug.LogWarning($"First if with {!AreEqualValue()} or { !AreEqualCount()} and {!HansBomb()}");
             selectedCards.ForEach(card => card.Deselect()); ;
             selectedCards.Clear();
             return;

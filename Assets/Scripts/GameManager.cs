@@ -54,7 +54,6 @@ public class GameManager : NetworkBehaviour
         public NetworkCard(int col, int val) {
             color = col;
             value = val;
-            Debug.Log($"Created NetworkCard {(Values)value} of {(Colors)color}");
         }
         public int color;
         public int value;
@@ -135,7 +134,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     public void InitDeckClientRpc()
     {
-        Debug.Log("Init deck called");
         colorsAvaliable.ForEach(col => valuesAvaliable.ForEach( val => networkDeck.Add(new NetworkCard((int)col,(int)val))));
     }
 
@@ -152,7 +150,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void ShuffleWithRandomClientRpc(int previousValue, int newValue)
     {
-        Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} is shuffling");
         NetworkCard temp = networkDeck[newValue];
         networkDeck[newValue] = networkDeck[0];
         networkDeck[0] = temp;
@@ -163,7 +160,6 @@ public class GameManager : NetworkBehaviour
     public void SetRandom()
     {
         rnd.Value = Random.Range(1, networkDeck.Count);
-        Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} randomized. New value: {rnd}");
     }
 
     //----------------------- Handling player order ------------------------
@@ -174,14 +170,12 @@ public class GameManager : NetworkBehaviour
     {
         currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
         currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
-        Debug.Log($"Current plaxer initially set to Player {currentPlayerId.Value}");
     }
 
 
     [ServerRpc(RequireOwnership = false)]
     public void NextPlayerServerRpc()
     {
-        Debug.Log("Called NextPlayerTestServerRpc");
         if (index + 1 < NetworkManager.Singleton.ConnectedClientsList.Count)
             index++;
         else
@@ -232,7 +226,6 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void HandleCardsToSpwawnServerRpc(NetworkColors cols)
     {
-        Debug.LogWarning("HandleCardsClient");
         SpriteHolder.sP.SetCardsBackClientRpc();
         SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, cols);
     }
@@ -345,7 +338,6 @@ public class GameManager : NetworkBehaviour
     public void AddPlayer(Player player)
     {
         //TODO check via debug if the local player assignmenet works
-        Debug.Log($"Player {player.name} is local player: {player.IsLocalPlayer}");
         players.Add(player);
         if (player.IsLocalPlayer)
             localPlayer = player;
