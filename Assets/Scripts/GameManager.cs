@@ -192,12 +192,15 @@ public class GameManager : NetworkBehaviour
         currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
 
         Player player = GetPlayerById(currentPlayerId.Value);
+        Debug.Log($"NextServer outside");
         if (player.IsDone())
         {
+            Debug.Log("Should be ready");
             players.Remove(player);
             NextPlayerServerRpc();
         }
-        //if (IsGameOver())
+        if (SpriteHolder.sP.goS.Count <= 0) return;
+        
         if (SpriteHolder.sP.goS[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
         {
             SpriteHolder.sP.SetCardsBackClientRpc();
