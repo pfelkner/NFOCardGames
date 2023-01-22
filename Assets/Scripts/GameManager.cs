@@ -46,7 +46,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField]
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
 
-    IDictionary<int, ulong> placements = new Dictionary<int, ulong>();
+    Dictionary<int, ulong> placements = new Dictionary<int, ulong>();
 
     public List<Player> playersFinished = new List<Player>();
 
@@ -198,7 +198,10 @@ public class GameManager : NetworkBehaviour
             NextPlayerServerRpc();
         }
         //if (IsGameOver())
-
+        if (SpriteHolder.sP.goS[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
+        {
+            SpriteHolder.sP.SetCardsBackClientRpc();
+        }
     }
 
     //----------------------- Update round state ------------------------
@@ -247,22 +250,28 @@ public class GameManager : NetworkBehaviour
         SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, cols);
     }
 
-
-
     [ServerRpc(RequireOwnership = false)]
-    public void IsEndTurnServerRpc()
+    public void CheckGameOverServerRpc()
     {
-        
-       
-        if (IsGameOver())
-        {
-            //UIManager.Instance.SetEndText($"{playersFinished[0]} wins");
-        }
+        if (players.Count > 1) return;
+        SetPlacementServerRpc();
+        Player player_ = GetPlayerById(currentPlayerId.Value);
+        //player_.cardsInHand.ForEach(c => c.gameObject.SetActive(false));
+        //player_.cardsInHand.Clear();
+        EndRoundClientRpc();
+        players.Clear();
     }
 
-    public bool IsGameOver()
+    [ClientRpc]
+    private void EndRoundClientRpc()
     {
-        return players.Count <= 1;
+        foreach (var player_ in players)
+        {
+            player_.cardsInHand.ForEach(_c => Destroy(_c.gameObject));
+            player_.cardsInHand.Clear();
+        }
+        players.Clear();
+        SpriteHolder.sP.SetCardsBackClientRpc();
     }
 
     public void SetPlayerCount()
@@ -370,7 +379,11 @@ public class GameManager : NetworkBehaviour
 
     internal void PrepareNextGame()
     {
-        // maybe check connected clients here or make sure to remove from players on disconnect
+        players[0].cardsInHand.Clear();
+        players.Clear();
+        foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+            players.Add(GetPlayerById(uid));
+
         playerCount = players.Count();
         lastCardPlayedValue.Value = 0;
         lastCardPlayedAmount.Value = 0;
@@ -379,22 +392,38 @@ public class GameManager : NetworkBehaviour
         //arschloch mischt
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
+        placements.Clear();
     }
 
     //Utils
 
     public static Player GetPlayerById(ulong id)
     {
+        Debug.Log($" GetPlayerById called by {NetworkManager.Singleton.LocalClientId}");
         return NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Player>();
     }
 
-    public void SetPlacement()
+    [ServerRpc(RequireOwnership =false)]
+    public void SetPlacementServerRpc()
     {
         int placement = placements.Count + 1;
         placements.Add(placement, currentPlayerId.Value);
+        LogPlacements();
     }
 
+    public void LogPlacements()
+    {
+        foreach(KeyValuePair<int, ulong> entry in placements)
+        {
+            Debug.Log($"Placement {entry.Key} : ID {entry.Value}");
+        }
+    }
 
+    [ServerRpc(RequireOwnership = false)]
+    internal void RemovePlayerServerRpc(ulong _id)
+    {
+        players.Remove(GetPlayerById(_id));
+    }
 }
 
 

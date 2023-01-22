@@ -69,6 +69,10 @@ public class Player : NetworkBehaviour
         {
             LogDeck();
         }
+        if (Input.GetKeyDown(KeyCode.L) && IsOwner)
+        {
+            GameManager.gM.LogPlacements();
+        }
 
         if (Input.GetKeyDown(KeyCode.V) && IsClient && IsOwner)
         {
@@ -191,23 +195,26 @@ public class Player : NetworkBehaviour
         if (IsDone())
         {
             //SpriteHolder.sP.SetWinLooseImageClientRpc();
-            GameManager.gM.SetPlacement();
+            GameManager.gM.SetPlacementServerRpc();
+            GameManager.gM.RemovePlayerServerRpc(GameManager.gM.currentPlayerId.Value);
         }
-        selectedCards.ForEach(card => card.gameObject.SetActive(false));
+        selectedCards.ForEach(card => HandlePlayerCard(card));
         selectedCards.Clear();
         
 
-        if (GameManager.gM.IsGameOver())
-        {
-            GameManager.gM.PrepareNextGame();
-            return;
-        }
-
         // setting new player
         GameManager.gM.NextPlayerServerRpc();
+
+        GameManager.gM.CheckGameOverServerRpc();
     }
 
     // ----------------------- Utils -----------------------
+
+    public void HandlePlayerCard(Card _card)
+    {
+        cardsInHand.Remove(_card);
+        Destroy(_card.gameObject);
+    }
 
     private NetworkColors GetSelectedColors(List<Card> _cards)
     {

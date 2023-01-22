@@ -11,7 +11,7 @@ public class SpriteHolder : NetworkBehaviour
     public List<Sprite> colorSprites = new List<Sprite>();
     public List<Sprite> valueSprites = new List<Sprite>();
 
-    public GameObject cardInMiddle;
+    public GameObject cardPrefab;
 
     public int cardsAmount;
 
@@ -74,7 +74,7 @@ public class SpriteHolder : NetworkBehaviour
         List<Colors> test = ParseNetworkCols(col);
         for (int i = 0; i < amount; i++)
         {   
-            GameObject go = Instantiate(cardInMiddle, new Vector2(4.4f+i+spacing+(Random.Range(0.5f,0.5f)), 4f+(Random.Range(-0.3f, 0.5f))), Quaternion.Euler(0.0f, 0.0f, Random.Range(-10f, 10f)));
+            GameObject go = Instantiate(cardPrefab, new Vector2(4.4f+i+spacing+(Random.Range(0.5f,0.5f)), 4f+(Random.Range(-0.3f, 0.5f))), Quaternion.Euler(0.0f, 0.0f, Random.Range(-10f, 10f)));
             Card card = go.GetComponent<Card>();
 
             card.valueRenderer.sortingOrder -= i;
@@ -84,8 +84,8 @@ public class SpriteHolder : NetworkBehaviour
             card.isPlayed = true;
 
             card.color = test[i];
-           
-            
+
+            card.ownerId = GameManager.gM.currentPlayerId.Value;
             Debug.LogWarning($"cast{(Values)cardsValue} :{cardsValue}");
             card.value = (Values)value;
             goS.Add(go);

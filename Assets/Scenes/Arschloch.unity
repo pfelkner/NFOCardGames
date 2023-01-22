@@ -2007,7 +2007,7 @@ MonoBehaviour:
   - {fileID: 411428638, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: 1144771790, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: -1811959245, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
-  cardInMiddle: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
+  cardPrefab: {fileID: 8362630139096574339, guid: 63a58ce6e19016a43a722910702aef67, type: 3}
   cardsAmount: 0
   cardsValue: 0
   goS: []
@@ -2319,7 +2319,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: d6c64b6ceca755843a1d01b4ff81bd0d, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 74adff4567fbb452fb11617bfe1289f3, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

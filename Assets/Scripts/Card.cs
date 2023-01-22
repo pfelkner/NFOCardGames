@@ -11,6 +11,7 @@ public class Card : MonoBehaviour
     public Values value;
    
     public Player cardOwner;
+    public ulong ownerId;
 
     // visuals
     public SpriteRenderer colorRenderer;
