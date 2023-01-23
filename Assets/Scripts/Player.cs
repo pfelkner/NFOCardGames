@@ -55,6 +55,7 @@ public class Player : NetworkBehaviour
         // testing
         if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
+            GameManager.gM.playerIds = (List<ulong>)NetworkManager.Singleton.ConnectedClientsIds;
             GameManager.gM.InitDeckClientRpc();
             GameManager.gM.InitShuffle();
             DealCards();

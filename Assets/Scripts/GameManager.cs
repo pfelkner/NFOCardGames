@@ -21,6 +21,7 @@ public class GameManager : NetworkBehaviour
     public Player localPlayer;
     int index;
     int playerCount;
+    public List<ulong> playerIds;
 
     public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
@@ -120,7 +121,9 @@ public class GameManager : NetworkBehaviour
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
         lastCardPlayedValue.Value = 0;
-        index = 0;
+        index = playerIds.Count;
+
+        
     }
 
     public override void OnNetworkDespawn()
@@ -184,21 +187,27 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void NextPlayerServerRpc()
     {
-        if (index + 1 < NetworkManager.Singleton.ConnectedClientsList.Count)
-            index++;
+        // TODO index not working properly
+        //if (index + 1 < playerIds.Count)
+        //    index++;
+        //else
+        //    index = 0;
+        if (index - 1 >= 0)
+            index--;
         else
-            index = 0;
+            index = playerIds.Count;
 
-        currentPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[index].ClientId;
+        currentPlayerId.Value = playerIds[index];
 
         Player player = GetPlayerById(currentPlayerId.Value);
-        Debug.Log($"NextServer outside");
+        Debug.Log($"NextPlayerServerRpc called by {currentPlayerId.Value}: player is done is {player.IsDone()}; Index is {index}");
         if (player.IsDone())
         {
             Debug.Log("Should be ready");
             players.Remove(player);
             NextPlayerServerRpc();
         }
+        // TODO make sure this is correct
         if (SpriteHolder.sP.goS.Count <= 0) return;
         
         if (SpriteHolder.sP.goS[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
@@ -224,28 +233,6 @@ public class GameManager : NetworkBehaviour
     // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     //----------------------- Game/Round End  ------------------------
 
-    //[ServerRpc(RequireOwnership = false)]
-    //public void SetWinnerServerRpc(ulong id, int placement)
-    //{
-    //    switch (placement)
-    //    {
-    //        case 1:
-    //            presiId.Value = id;
-    //            break;
-    //        case 2:
-    //            vizePId.Value = id;
-    //            break;
-    //        case 3:
-    //            vizeIAd.Value = id;
-    //            break;
-    //        case 4:
-    //            arschId.Value = id;
-    //            break;
-    //        default:
-    //            // code block
-    //            break;
-    //    }
-    //}
     [ServerRpc(RequireOwnership =false)]
     public void HandleCardsToSpwawnServerRpc(NetworkColors cols)
     {
@@ -426,6 +413,7 @@ public class GameManager : NetworkBehaviour
     internal void RemovePlayerServerRpc(ulong _id)
     {
         players.Remove(GetPlayerById(_id));
+        playerIds.Remove(_id);
     }
 }
 
