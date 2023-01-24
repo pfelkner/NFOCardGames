@@ -158,16 +158,16 @@ public class Player : NetworkBehaviour
         networkHand.Remove(newValOne_);
         Card c1 = cardsInHand.Find(c => (int)c.value == newValOne_.value && (int)c.color == newValOne_.color);
         cardsInHand.Remove(c1);
-        Destroy(c1.gameObject);
+        //Destroy(c1.gameObject);
+        c1.gameObject.transform.position = new Vector2(-15, -15);
     
         newValTwo_ = networkHand.First(c => c.value == _valTwo);
         networkHand.Remove(newValTwo_);
         Card c2 = cardsInHand.Find(c => (int)c.value == newValTwo_.value && (int)c.color == newValTwo_.color);
         cardsInHand.Remove(c2);
-        Destroy(c2.gameObject);
+        //Destroy(c2.gameObject);
+        c2.gameObject.transform.position = new Vector2(-15, -15);
 
-        Debug.Log(newValOne_.ToString());
-        Debug.Log(newValTwo_.ToString());
         HandleStolenCardsServerRpc(newValOne_, newValTwo_, _senderId);
     }
     [ServerRpc(RequireOwnership =false)]
@@ -182,6 +182,10 @@ public class Player : NetworkBehaviour
        
         networkHand.Add(_newValOne);
         networkHand.Add(_newValTwo);
+
+        cardsInHand.ForEach(c => Destroy(c.gameObject));
+        //cardsInHand.
+        SpawnCardsClientRpc();
     }
 
     // this will contain clicking cards and checking wchich cards are viable to play

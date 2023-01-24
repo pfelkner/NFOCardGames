@@ -325,6 +325,8 @@ public class GameManager : NetworkBehaviour
         int valOne_ = (int)_vals[0];
         int valTwo_ = (int)_vals[1];
 
+
+
         Debug.Log("Target ID: " + targetId_);
 
         if(IsOwner)
