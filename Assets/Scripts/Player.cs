@@ -130,18 +130,49 @@ public class Player : NetworkBehaviour
     {
         int deckIndex = 0;
         //foreach (var clientid in NetworkManager.Singleton.ConnectedClientsIds)
+        
+
         foreach (Player player in GameManager.gM.players)
         {
-            
+            player.networkHand.Clear();
+
             for (int i = 0; i < GameManager.gM.maximumCardsInHand; i++)
             {
                 player.networkHand.Add(GameManager.gM.networkDeck[deckIndex]);
                 deckIndex++;
-
             }
         }
     }
 
+    [ClientRpc]
+    public void StealCardsClientRpc(int valOne_, int valTwo_, ulong _senderId, ClientRpcParams clientRpcParams)
+    {
+        Debug.Log("steal " + valOne_ + "and" + valTwo_ +":"+ _senderId);
+        // sind im arschloch
+        NetworkCard newValOne_ = new NetworkCard();
+        NetworkCard newValTwo_ = new NetworkCard();
+
+       
+        newValOne_ = networkHand.First(c => c.value == valOne_);
+        networkHand.Remove(newValOne_);
+    
+        newValTwo_ = networkHand.First(c => c.value == valTwo_);
+        networkHand.Remove(newValTwo_);
+
+        Debug.Log(newValOne_.ToString());
+        Debug.Log(newValTwo_.ToString());
+        GiveCardsBackClientRpc(newValOne_, newValTwo_, GameManager.gM.TargetId(0));
+    }
+
+    [ClientRpc]
+    private void GiveCardsBackClientRpc(NetworkCard newValOne_, NetworkCard newValTwo_, ClientRpcParams clientRpcParams)
+    {
+        // bugs  wrong player to call 
+        Debug.LogWarning("Give Cards Back to" + clientRpcParams);
+        networkHand.Clear();
+        networkHand.Add(newValOne_);
+        networkHand.Add(newValTwo_);
+    }
 
     // this will contain clicking cards and checking wchich cards are viable to play
     [ClientRpc]
@@ -265,7 +296,6 @@ public class Player : NetworkBehaviour
         foreach (NetworkCard networkCard in networkHand)
         {
             Debug.Log("LocalClientId: "+NetworkManager.Singleton.LocalClientId+" "+networkCard.ToString());
-            Debug.Log("of "+NetworkObject.NetworkObjectId);
             
         }
     }

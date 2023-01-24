@@ -51,9 +51,11 @@ public class GameManager : NetworkBehaviour
 
     public List<Player> playersFinished = new List<Player>();
 
+    
+
     public struct NetworkCard : INetworkSerializable
     {
-        public NetworkCard(int col, int val) {
+        public NetworkCard(int col = -1, int val = -1) {
             color = col;
             value = val;
         }
@@ -154,6 +156,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void ShuffleWithRandomClientRpc(int previousValue, int newValue)
     {
+        Debug.Log("shuffle");
         NetworkCard temp = networkDeck[newValue];
         networkDeck[newValue] = networkDeck[0];
         networkDeck[0] = temp;
@@ -356,7 +359,7 @@ public class GameManager : NetworkBehaviour
         if (player.IsLocalPlayer)
             localPlayer = player;
     }
-    private ClientRpcParams TargetId(ulong id)
+    public ClientRpcParams TargetId(ulong id)
     {
         return new ClientRpcParams
         {
@@ -383,6 +386,22 @@ public class GameManager : NetworkBehaviour
         //placements.Clear();
     }
 
+    public void RequestCard(List<Values> _vals)
+    {
+        ulong targetId_ = placements[placements.Count];
+        int valOne_ = (int)_vals[0];
+        int valTwo_ = (int)_vals[1];
+
+        Debug.Log("Target ID: " + targetId_);
+
+        GetPlayerById(targetId_).StealCardsClientRpc(valOne_, valTwo_, placements[1], TargetId(1));
+
+        // finde arsch
+        // values entpacken
+        // arsch karten entnehmen 
+    }
+ 
+
     //Utils
 
     public static Player GetPlayerById(ulong id)
@@ -394,7 +413,7 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void SetPlacementServerRpc()
     {
-        int placement = placements.Count + 1;
+        int placement = placements.Count +1;
         placements.Add(placement, currentPlayerId.Value);
         LogPlacements();
     }
@@ -413,6 +432,10 @@ public class GameManager : NetworkBehaviour
         playerIds.Remove(_id);
         Debug.LogWarning($"RemovePlayerServerRpc: count after remove = {NetworkManager.Singleton.ConnectedClientsIds.Count}");
     }
+
+    
+
+
 }
 
 
