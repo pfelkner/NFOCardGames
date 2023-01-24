@@ -21,7 +21,7 @@ public class GameManager : NetworkBehaviour
     public Player localPlayer;
     int index;
     int playerCount;
-    public List<ulong> playerIds;
+    public List<ulong> playerIds = new List<ulong>();
 
     public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
@@ -121,8 +121,8 @@ public class GameManager : NetworkBehaviour
         rnd.OnValueChanged += ShuffleWithRandomClientRpc;
         currentPlayerId.Value = 69420;
         lastCardPlayedValue.Value = 0;
-        index = playerIds.Count;
-
+        //index = playerIds.Count;
+        index = 0;
         
     }
 
@@ -187,24 +187,22 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void NextPlayerServerRpc()
     {
-        // TODO index not working properly
-        //if (index + 1 < playerIds.Count)
-        //    index++;
+        Debug.LogWarning($"I plaerids length = {playerIds.Count}; index = {index}");
+        //if (index - 1 >= 0)
+        //    index--;
         //else
-        //    index = 0;
-        if (index - 1 >= 0)
-            index--;
+        //    index = playerIds.Count;
+        if (index + 1 < playerIds.Count)
+            index++;
         else
-            index = playerIds.Count;
-
+            index = 0;
+        Debug.LogWarning($"II plaerids length = {playerIds.Count}; index = {index}");
         currentPlayerId.Value = playerIds[index];
 
         Player player = GetPlayerById(currentPlayerId.Value);
         Debug.Log($"NextPlayerServerRpc called by {currentPlayerId.Value}: player is done is {player.IsDone()}; Index is {index}");
         if (player.IsDone())
         {
-            Debug.Log("Should be ready");
-            players.Remove(player);
             NextPlayerServerRpc();
         }
         // TODO make sure this is correct
@@ -243,13 +241,14 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void CheckGameOverServerRpc()
     {
-        if (players.Count > 1) return;
+        if (playerIds.Count > 1) return;
         SetPlacementServerRpc();
         Player player_ = GetPlayerById(currentPlayerId.Value);
         //player_.cardsInHand.ForEach(c => c.gameObject.SetActive(false));
         //player_.cardsInHand.Clear();
         EndRoundClientRpc();
-        players.Clear();
+
+        PrepareNextGameServerRpc();
     }
 
     [ClientRpc]
@@ -260,7 +259,6 @@ public class GameManager : NetworkBehaviour
             player_.cardsInHand.ForEach(_c => Destroy(_c.gameObject));
             player_.cardsInHand.Clear();
         }
-        players.Clear();
         SpriteHolder.sP.SetCardsBackClientRpc();
     }
 
@@ -366,23 +364,23 @@ public class GameManager : NetworkBehaviour
         };
     }
 
-
-    internal void PrepareNextGame()
+    [ServerRpc]
+    public void PrepareNextGameServerRpc()
     {
-        players[0].cardsInHand.Clear();
-        players.Clear();
-        foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
-            players.Add(GetPlayerById(uid));
+        Debug.Log($"PrepareNextGameServerRpc on {NetworkManager.Singleton.LocalClientId}; Amount of clients: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
 
-        playerCount = players.Count();
+        playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
+        Debug.Log($"playerIds lenght after reset: {playerIds.Count}");
+        playerCount = players.Count;
         lastCardPlayedValue.Value = 0;
         lastCardPlayedAmount.Value = 0;
 
         InitShuffle();
         //arschloch mischt
+        Debug.Log($"CurrentPlayerId {currentPlayerId.Value}");
         GetPlayerById(currentPlayerId.Value).DealCards();
-        SetFirstPlayerServerRpc();
-        placements.Clear();
+        //SetFirstPlayerServerRpc();
+        //placements.Clear();
     }
 
     //Utils
@@ -412,8 +410,8 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     internal void RemovePlayerServerRpc(ulong _id)
     {
-        players.Remove(GetPlayerById(_id));
         playerIds.Remove(_id);
+        Debug.LogWarning($"RemovePlayerServerRpc: count after remove = {NetworkManager.Singleton.ConnectedClientsIds.Count}");
     }
 }
 

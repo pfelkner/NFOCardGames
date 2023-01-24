@@ -44,6 +44,7 @@ public class Player : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
+        GameManager.gM.players.Remove(this);
     }
 
 
@@ -55,7 +56,7 @@ public class Player : NetworkBehaviour
         // testing
         if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
-            GameManager.gM.playerIds = (List<ulong>)NetworkManager.Singleton.ConnectedClientsIds;
+            GameManager.gM.playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
             GameManager.gM.InitDeckClientRpc();
             GameManager.gM.InitShuffle();
             DealCards();
@@ -75,9 +76,14 @@ public class Player : NetworkBehaviour
             GameManager.gM.LogPlacements();
         }
 
-        if (Input.GetKeyDown(KeyCode.V) && IsClient && IsOwner)
+        if (Input.GetKeyDown(KeyCode.Space) && IsClient && IsOwner)
         {
             OnTurnEnd();
+        }
+
+        if (Input.GetKeyDown(KeyCode.K) && IsClient && IsOwner)
+        {
+            Debug.Log("**********"+NetworkManager.Singleton.ConnectedClientsIds.Count+"***************");
         }
     }
 
