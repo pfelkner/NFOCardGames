@@ -145,7 +145,7 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void StealCardsFromPlayerToSenderClientRpc(int _valOne, int _valTwo, ulong _senderId, ulong _targetId)
+    public void StealCardsFromPlayerToSenderClientRpc(int _valOne, int _valTwo, ulong _senderId, ClientRpcParams  _targetId)
     {
         Debug.Log("steal " + _valOne + "and" + _valTwo +"from"+_targetId+ "to"+ _senderId +"Shoult only be called in target client");
         // sind im arschloch
@@ -167,11 +167,11 @@ public class Player : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void HandleStolenCardsServerRpc(NetworkCard newCardOne_,NetworkCard newCardTwo_,ulong _senderId)
     {
-        GetPlayerById(_senderId).GiveCardsBackClientRpc(newCardOne_, newCardTwo_, _senderId);
+        GetPlayerById(_senderId).GiveCardsBackClientRpc(newCardOne_, newCardTwo_, GameManager.gM.TargetId(_senderId));
     }
 
     [ClientRpc]
-    public void GiveCardsBackClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ulong _PraesiId)
+    public void GiveCardsBackClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ClientRpcParams _PraesiId)
     {
        
         networkHand.Add(_newValOne);
