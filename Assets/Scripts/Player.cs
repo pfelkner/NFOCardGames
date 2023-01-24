@@ -156,9 +156,15 @@ public class Player : NetworkBehaviour
         newValOne_ = networkHand.First(c => c.value == _valOne);
         // if no match -> error
         networkHand.Remove(newValOne_);
+        Card c1 = cardsInHand.Find(c => (int)c.value == newValOne_.value && (int)c.color == newValOne_.color);
+        cardsInHand.Remove(c1);
+        Destroy(c1.gameObject);
     
         newValTwo_ = networkHand.First(c => c.value == _valTwo);
         networkHand.Remove(newValTwo_);
+        Card c2 = cardsInHand.Find(c => (int)c.value == newValTwo_.value && (int)c.color == newValTwo_.color);
+        cardsInHand.Remove(c2);
+        Destroy(c2.gameObject);
 
         Debug.Log(newValOne_.ToString());
         Debug.Log(newValTwo_.ToString());
