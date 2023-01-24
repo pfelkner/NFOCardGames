@@ -384,17 +384,33 @@ public class GameManager : NetworkBehaviour
         GetPlayerById(currentPlayerId.Value).DealCards();
         //SetFirstPlayerServerRpc();
         //placements.Clear();
+        UIManager.Instance.TurnOnExchanger();
     }
 
-    public void RequestCard(List<Values> _vals)
+    public void RequestCard(List<Values> _vals, bool _flag)
     {
-        ulong targetId_ = placements[placements.Count];
+        // erste mal is true, der präsi will karten , das zweite mal false , der präsi gibt karten
+        // der unterschied ist nur dass die empfänger sender getauscht werden
+        ulong targetId_;
+        ulong senderId_;
+        if (_flag)
+        {
+            targetId_ = placements[placements.Count];
+            senderId_ = placements[1];
+        }
+        else
+        {
+            targetId_ = placements[1];
+            senderId_ = placements[placements.Count];
+        }
+       
         int valOne_ = (int)_vals[0];
         int valTwo_ = (int)_vals[1];
 
         Debug.Log("Target ID: " + targetId_);
 
-        GetPlayerById(targetId_).StealCardsClientRpc(valOne_, valTwo_, placements[1], TargetId(1));
+        if(IsOwner)
+            GetPlayerById(targetId_).StealCardsFromPlayerToSenderClientRpc(valOne_, valTwo_, senderId_,targetId_);
 
         // finde arsch
         // values entpacken

@@ -5,5 +5,6 @@ using UnityEngine;
 public class CardUI : MonoBehaviour
 {
     public Values value;
-    public bool selected; 
+    public bool selected;
+
 }

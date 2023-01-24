@@ -145,33 +145,37 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void StealCardsClientRpc(int valOne_, int valTwo_, ulong _senderId, ClientRpcParams clientRpcParams)
+    public void StealCardsFromPlayerToSenderClientRpc(int _valOne, int _valTwo, ulong _senderId, ulong _targetId)
     {
-        Debug.Log("steal " + valOne_ + "and" + valTwo_ +":"+ _senderId);
+        Debug.Log("steal " + _valOne + "and" + _valTwo +"from"+_targetId+ "to"+ _senderId +"Shoult only be called in target client");
         // sind im arschloch
         NetworkCard newValOne_ = new NetworkCard();
         NetworkCard newValTwo_ = new NetworkCard();
 
        
-        newValOne_ = networkHand.First(c => c.value == valOne_);
+        newValOne_ = networkHand.First(c => c.value == _valOne);
+        // if no match -> error
         networkHand.Remove(newValOne_);
     
-        newValTwo_ = networkHand.First(c => c.value == valTwo_);
+        newValTwo_ = networkHand.First(c => c.value == _valTwo);
         networkHand.Remove(newValTwo_);
 
         Debug.Log(newValOne_.ToString());
         Debug.Log(newValTwo_.ToString());
-        GiveCardsBackClientRpc(newValOne_, newValTwo_, GameManager.gM.TargetId(0));
+        HandleStolenCardsServerRpc(newValOne_, newValTwo_, _senderId);
+    }
+    [ServerRpc(RequireOwnership =false)]
+    public void HandleStolenCardsServerRpc(NetworkCard newCardOne_,NetworkCard newCardTwo_,ulong _senderId)
+    {
+        GetPlayerById(_senderId).GiveCardsBackClientRpc(newCardOne_, newCardTwo_, _senderId);
     }
 
     [ClientRpc]
-    private void GiveCardsBackClientRpc(NetworkCard newValOne_, NetworkCard newValTwo_, ClientRpcParams clientRpcParams)
+    public void GiveCardsBackClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ulong _PraesiId)
     {
-        // bugs  wrong player to call 
-        Debug.LogWarning("Give Cards Back to" + clientRpcParams);
-        networkHand.Clear();
-        networkHand.Add(newValOne_);
-        networkHand.Add(newValTwo_);
+       
+        networkHand.Add(_newValOne);
+        networkHand.Add(_newValTwo);
     }
 
     // this will contain clicking cards and checking wchich cards are viable to play

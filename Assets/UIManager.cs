@@ -26,6 +26,8 @@ public class UIManager : MonoBehaviour
     public Color frameColorTurn;
     public Color frameColorNoTurn;
 
+    public GameObject exchanger;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -85,6 +87,11 @@ public class UIManager : MonoBehaviour
     public void SetEndText(string _txt)
     {
         endText.text = _txt;
+    }
+
+    public void TurnOnExchanger()
+    {
+        exchanger.SetActive(true);
     }
 
 

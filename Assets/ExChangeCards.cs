@@ -18,6 +18,8 @@ public class ExChangeCards : MonoBehaviour
     CardUI cardUI;
     public TextMeshProUGUI text;
 
+    public int counter;
+
     private void Update()
     {
         string newText = string.Empty;
@@ -44,21 +46,62 @@ public class ExChangeCards : MonoBehaviour
 
     public void OnClickAdd()
     {
-        if (valuesToChoose.Count < 2)
+        if (counter == 0)
         {
-            valuesToChoose.Add(cardUI.value);
+            if (valuesToChoose.Count < 2)
+            {
+                valuesToChoose.Add(cardUI.value);
+            }
         }
+        else
+        {
+            if (valuesToRemove.Count < 2)
+            {
+                valuesToRemove.Add(cardUI.value);
+            }
+        }
+    
     }
 
     public void OnClickRemove()
     {
-         valuesToChoose.Remove(valuesToChoose.First(c => c == cardUI.value));
+
+        if (counter == 0)
+        {
+            valuesToChoose.Remove(valuesToChoose.First(c => c == cardUI.value));
+        }
+        else
+        {
+            valuesToChoose.Remove(valuesToRemove.First(c => c == cardUI.value));
+        }
+
+      
     }
 
     public void SentCards()
     {
-        GameManager.gM.RequestCard(valuesToChoose);
+        if (counter == 0)
+        {
+            CardsToSteal();
+        } else
+        {
+            CardsToGe();
+        }
+    }
+
+    public void CardsToSteal()
+    {
+        GameManager.gM.RequestCard(valuesToChoose,true);
+        counter++;
+        text.text = string.Empty;
         gameObject.SetActive(false);
+     
+    }
+    public void CardsToGe()
+    {
+        GameManager.gM.RequestCard(valuesToRemove,false);
+        gameObject.SetActive(false);
+        counter = 0;
     }
 
     
