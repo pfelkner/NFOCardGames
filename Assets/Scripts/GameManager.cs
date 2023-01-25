@@ -337,12 +337,6 @@ public class GameManager : NetworkBehaviour
         SetPlacementServerRpc();
         RemovePlayerIdServerRpc(currentPlayerId.Value);
     }
-
-    public void EndTurn()
-    {
-        GameManager.gM.NextPlayerServerRpc();
-        GameManager.gM.CheckGameOverServerRpc();
-    }
 }
 
 

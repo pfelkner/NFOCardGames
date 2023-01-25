@@ -17,19 +17,12 @@ public class Player : NetworkBehaviour
     public GameObject cardPrefab;
 
     public List<Card> selectedCards = new List<Card>();
-    private void OnEnable()
-    {
-        gameObject.name = $"Player {gM.players.Count+1}";
-        GameManager.gM.players.Add(this);
-        UIManager.Instance.endTurnBtn.onClick.AddListener(TakeTurn);
-    }
-
-    private void OnDisable()
-    {
-    }
 
     public override void OnNetworkSpawn()
     {
+        gameObject.name = $"Player {gM.players.Count + 1}";
+        GameManager.gM.players.Add(this);
+        UIManager.Instance.endTurnBtn.onClick.AddListener(TakeTurn);
     }
 
     public override void OnNetworkDespawn()
