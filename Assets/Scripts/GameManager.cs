@@ -1,56 +1,37 @@
-using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using Newtonsoft.Json.Linq;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class GameManager : NetworkBehaviour
 {
-    //----------------------- config start //-----------------------
     public static GameManager gM;
 
-    [Header("SetUp")]
+    [Header("Network")]
+    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public List<NetworkCard> networkDeck = new List<NetworkCard>();
+
+    [Header("Setup")]
     public GameObject cardEmptyPrefab;
     public GameObject deckGO;
 
+    [Header("Control")]
     public List<Player> players;
-    public Player localPlayer;
-    int index;
-    int playerCount;
     public List<ulong> playerIds = new List<ulong>();
 
-    public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
-    public NetworkClient currentPlayerNetworkClient;
-
     [Header("DeckInfo")]
-    public List<Colors> colorsAvaliable;
-    public List<Values> valuesAvaliable;
-
-    public TMPro.TextMeshProUGUI text;
+    [SerializeField] private List<Colors> colorsAvaliable;
+    [SerializeField] private List<Values> valuesAvaliable;
 
     [Header("Rules")]
     public int maximumCardsInHand;
 
-    //[HideInInspector]
-    public static List<Card> createdCardsList = new List<Card>();
-
-    public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    
-    public NetworkVariable<NetworkCard> netWorkCard = new NetworkVariable<NetworkCard>();
-    public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    [SerializeField]
-    public List<NetworkCard> networkDeck = new List<NetworkCard>();
-
-    Dictionary<int, ulong> placements = new Dictionary<int, ulong>();
-
-    public List<Player> playersFinished = new List<Player>();
-
+    private Dictionary<int, ulong> placements = new Dictionary<int, ulong>();
+    private int currenPlayerIndex;
+    private int playerCount;
 
     private void Awake()
     {
@@ -75,7 +56,7 @@ public class GameManager : NetworkBehaviour
     {
         currentPlayerId.Value = 69420;
         lastCardPlayedValue.Value = 0;
-        index = 0;
+        currenPlayerIndex = 0;
     }
 
     public void InitHandlers()
@@ -89,13 +70,13 @@ public class GameManager : NetworkBehaviour
     private void OnLastCardPlayedValueChanged(int prevVal, int newVal)
     {
         UIManager.Instance.ChangeTextForPlayerValue((Values) newVal);
-        SpriteHolder.sP.cardsValue = newVal;
+        SpriteHolder.sh.cardsValue = newVal;
     }
 
     private void OnLastCardPlayedAmountChanged(int prevVal, int newVal)
     {
         UIManager.Instance.ChangeTextForPlayerInt(newVal);
-        SpriteHolder.sP.cardsAmount = newVal;
+        SpriteHolder.sh.cardsAmount = newVal;
     }
 
 
@@ -141,6 +122,7 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void SetFirstPlayerServerRpc()
     {
+        NetworkClient currentPlayerNetworkClient;
         if (placements.Count == 0)
         {
             // TODO first round: lowest heart, not host
@@ -161,12 +143,12 @@ public class GameManager : NetworkBehaviour
         //    index--;
         //else
         //    index = playerIds.Count;
-        if (index + 1 < playerIds.Count)
-            index++;
+        if (currenPlayerIndex + 1 < playerIds.Count)
+            currenPlayerIndex++;
         else
-            index = 0;
+            currenPlayerIndex = 0;
 
-        currentPlayerId.Value = playerIds[index];
+        currentPlayerId.Value = playerIds[currenPlayerIndex];
 
         Player player = GetPlayerById(currentPlayerId.Value);
         if (player.IsDone())
@@ -179,11 +161,11 @@ public class GameManager : NetworkBehaviour
     //
     private void ResetCardsInMiddle()
     {
-        if (SpriteHolder.sP.goS.Count <= 0) return;
+        if (SpriteHolder.sh.cardGos.Count <= 0) return;
         
-        if (SpriteHolder.sP.goS[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
+        if (SpriteHolder.sh.cardGos[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
         {
-            SpriteHolder.sP.ResetCardsInMiddleClientRpc();
+            SpriteHolder.sh.ResetCardsInMiddleClientRpc();
         }
     }
 
@@ -206,8 +188,8 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void HandleCardsToSpwawnServerRpc(NetworkColors cols)
     {
-        SpriteHolder.sP.ResetCardsInMiddleClientRpc();
-        SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, cols);
+        SpriteHolder.sh.ResetCardsInMiddleClientRpc();
+        SpriteHolder.sh.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, cols);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -215,11 +197,7 @@ public class GameManager : NetworkBehaviour
     {
         if (playerIds.Count > 1) return;
         SetPlacementServerRpc();
-        Player player_ = GetPlayerById(currentPlayerId.Value);
-        //player_.cardsInHand.ForEach(c => c.gameObject.SetActive(false));
-        //player_.cardsInHand.Clear();
         EndRoundClientRpc();
-
         PrepareNextGameServerRpc();
     }
 
@@ -231,7 +209,7 @@ public class GameManager : NetworkBehaviour
             player_.cardsInHand.ForEach(_c => Destroy(_c.gameObject));
             player_.cardsInHand.Clear();
         }
-        SpriteHolder.sP.ResetCardsInMiddleClientRpc();
+        SpriteHolder.sh.ResetCardsInMiddleClientRpc();
     }
 
     public void SetPlayerCount()
@@ -251,21 +229,19 @@ public class GameManager : NetworkBehaviour
     public void PrepareNextGameServerRpc()
     {
         Debug.Log($"PrepareNextGameServerRpc on {NetworkManager.Singleton.LocalClientId}; Amount of clients: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
-
         playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
-        Debug.Log($"playerIds lenght after reset: {playerIds.Count}");
-        SetPlayerCount();
-        lastCardPlayedValue.Value = 0;
-        lastCardPlayedAmount.Value = 0;
-
+        ResetLastPlayed();
         InitShuffle();
-        //arschloch mischt
-        Debug.Log($"CurrentPlayerId {currentPlayerId.Value}");
         GetPlayerById(currentPlayerId.Value).DealCards();
-        //SetFirstPlayerServerRpc();
-        //placements.Clear();
         UIManager.Instance.TurnOnExchanger();
     }
+
+    private void ResetLastPlayed()
+    {
+        lastCardPlayedValue.Value = 0;
+        lastCardPlayedAmount.Value = 0;
+    }
+   
 
     public void RequestCard(List<Values> _vals, bool _flag)
     {
@@ -302,9 +278,13 @@ public class GameManager : NetworkBehaviour
 
     //Utils
 
+    public Dictionary<int,ulong> GetPlacement()
+    {
+        return placements;
+    }
+
     public static Player GetPlayerById(ulong id)
     {
-        Debug.Log($" GetPlayerById called by {NetworkManager.Singleton.LocalClientId}");
         return NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(id).GetComponent<Player>();
     }
 
@@ -333,7 +313,6 @@ public class GameManager : NetworkBehaviour
 
     public void HandlePlayerDone()
     {
-        //SpriteHolder.sP.SetWinLooseImageClientRpc();
         SetPlacementServerRpc();
         RemovePlayerIdServerRpc(currentPlayerId.Value);
     }

@@ -43,8 +43,8 @@ public class Card : MonoBehaviour
     public void SetToSprite()
     {
         cardRenderer.enabled = true;
-        colorRenderer.sprite = SpriteHolder.sP.colorSprites[(int)color];
-        valueRenderer.sprite = SpriteHolder.sP.valueSprites[(int)value];
+        colorRenderer.sprite = SpriteHolder.sh.colorSprites[(int)color];
+        valueRenderer.sprite = SpriteHolder.sh.valueSprites[(int)value];
 
 
 

@@ -6,7 +6,7 @@ using static GameManager;
 
 public class SpriteHolder : NetworkBehaviour
 {
-    public static SpriteHolder sP;
+    public static SpriteHolder sh;
 
     public List<Sprite> colorSprites = new List<Sprite>();
     public List<Sprite> valueSprites = new List<Sprite>();
@@ -17,7 +17,7 @@ public class SpriteHolder : NetworkBehaviour
 
     public int cardsValue;
 
-    public List<GameObject> goS;
+    public List<GameObject> cardGos;
 
     public List<Sprite> winLooseImageSprites;
     public SpriteRenderer winLooseImage;
@@ -29,7 +29,7 @@ public class SpriteHolder : NetworkBehaviour
 
     private void Awake()
     {
-        if (sP == null) sP = this;   
+        if (sh == null) sh = this;   
     }
 
   
@@ -88,23 +88,24 @@ public class SpriteHolder : NetworkBehaviour
             card.ownerId = GameManager.gM.currentPlayerId.Value;
             Debug.LogWarning($"cast{(Values)cardsValue} :{cardsValue}");
             card.value = (Values)value;
-            goS.Add(go);
+            cardGos.Add(go);
         }
     }
 
     [ClientRpc]
     public void ResetCardsInMiddleClientRpc()
     {
-        for (int i = 0; i < goS.Count; i++)
+        for (int i = 0; i < cardGos.Count; i++)
         {
-            Destroy(goS[i]);
+            Destroy(cardGos[i]);
         }
-        goS.Clear();
+        cardGos.Clear();
     }
 
     [ClientRpc]
     public void SetWinLooseImageClientRpc()
     {
+        Dictionary<int,ulong> dict_ = GameManager.gM.GetPlacement();
         winLooseImage.sprite = winLooseImageSprites[winnerCounter.Value];
         winnerCounter.Value++;
     }

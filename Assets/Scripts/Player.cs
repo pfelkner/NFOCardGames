@@ -1,12 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using TMPro;
 using UnityEngine;
 using static GameManager;
-using UnityEditor.PackageManager;
-using Unity.VisualScripting;
 using System.Linq;
 
 public class Player : NetworkBehaviour
@@ -22,7 +17,6 @@ public class Player : NetworkBehaviour
     {
         gameObject.name = $"Player {gM.players.Count + 1}";
         GameManager.gM.players.Add(this);
-        UIManager.Instance.endTurnBtn.onClick.AddListener(TakeTurn);
     }
 
     public override void OnNetworkDespawn()
@@ -69,23 +63,31 @@ public class Player : NetworkBehaviour
     private void SpawnCardsClientRpc()
     {
         float spacing = 0f;
-        List<NetworkCard> newHand = networkHand.OrderBy(card => card.value).ToList();
+        List<NetworkCard> newHand = SortNetworkCards(networkHand);
         // crate cards locally
         foreach (NetworkCard networkCard in newHand)
         {
-            GameObject go = Instantiate(cardPrefab, new Vector2(-10f, -10f), Quaternion.identity);
-            Card currentCard = go.GetComponent<Card>();
-
-            currentCard.value = (Values)networkCard.value;
-            currentCard.color = (Colors)networkCard.color;
-            go.name = currentCard.value + " of " + currentCard.color;
-
-            currentCard.cardOwner = this;
-
-            cardsInHand.Add(currentCard);
+            CreateCardInHand(networkCard);
             spacing++;
         }
-        SpriteHolder.sP.SetSpritesPosition(this);
+        SpriteHolder.sh.SetSpritesPosition(this);
+    }
+    private List<NetworkCard> SortNetworkCards(List<NetworkCard> _netHand)
+    {
+       return _netHand.OrderBy(card => card.value).ToList();
+    }
+    private void CreateCardInHand(NetworkCard _netCard)
+    {
+        GameObject go = Instantiate(cardPrefab, new Vector2(-10f, -10f), Quaternion.identity);
+        Card currentCard = go.GetComponent<Card>();
+
+        currentCard.value = (Values)_netCard.value;
+        currentCard.color = (Colors)_netCard.color;
+        go.name = currentCard.value + " of " + currentCard.color;
+
+        currentCard.cardOwner = this;
+
+        cardsInHand.Add(currentCard);
     }
 
     internal void DealCards()
@@ -167,7 +169,6 @@ public class Player : NetworkBehaviour
     public bool IsValidCard(Card card)
     {
         return (int)card.value > GameManager.gM.lastCardPlayedValue.Value || HansBomb();
-        
     }
     public bool HansBomb()
     {

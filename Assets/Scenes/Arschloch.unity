@@ -2227,16 +2227,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostClientText: {fileID: 115166020}
   playerTxt: {fileID: 1338346167}
-  _parent: {fileID: 581227867}
-  endTurnBtn: {fileID: 648467971}
+  btnPanel: {fileID: 581227867}
   cardTOBeatText: {fileID: 421755087}
   amountToBeat: {fileID: 592873825}
   isCurrentPlayerText: {fileID: 770633353}
-  endText: {fileID: 1778475773}
   frameImage: {fileID: 1207401118}
   frameColorTurn: {r: 0.8584906, g: 0.85484874, b: 0.2956123, a: 1}
   frameColorNoTurn: {r: 0.5754717, g: 0.21864776, b: 0.13843894, a: 1}
-  exchanger: {fileID: 519583563}
+  exchangerGo: {fileID: 519583563}
 --- !u!4 &894057386
 Transform:
   m_ObjectHideFlags: 0
