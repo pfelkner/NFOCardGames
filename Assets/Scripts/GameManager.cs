@@ -325,10 +325,23 @@ public class GameManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    internal void RemovePlayerServerRpc(ulong _id)
+    internal void RemovePlayerIdServerRpc(ulong _id)
     {
         playerIds.Remove(_id);
         Debug.LogWarning($"RemovePlayerServerRpc: count after remove = {NetworkManager.Singleton.ConnectedClientsIds.Count}");
+    }
+
+    public void HandlePlayerDone()
+    {
+        //SpriteHolder.sP.SetWinLooseImageClientRpc();
+        SetPlacementServerRpc();
+        RemovePlayerIdServerRpc(currentPlayerId.Value);
+    }
+
+    public void EndTurn()
+    {
+        GameManager.gM.NextPlayerServerRpc();
+        GameManager.gM.CheckGameOverServerRpc();
     }
 }
 

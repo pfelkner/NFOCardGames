@@ -4,12 +4,10 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using TMPro;
 using UnityEngine;
-using static UnityEngine.CullingGroup;
 using static GameManager;
 using UnityEditor.PackageManager;
 using Unity.VisualScripting;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 
 public class Player : NetworkBehaviour
 {
@@ -19,31 +17,23 @@ public class Player : NetworkBehaviour
     public GameObject cardPrefab;
 
     public List<Card> selectedCards = new List<Card>();
-
-    public int cardsInHandCounter;
-
     private void OnEnable()
     {
         gameObject.name = $"Player {gM.players.Count+1}";
         GameManager.gM.players.Add(this);
-        UIManager.Instance.endTurnBtn.onClick.AddListener(OnTurnEnd);
-
-        cardsInHandCounter = GameManager.gM.maximumCardsInHand;
+        UIManager.Instance.endTurnBtn.onClick.AddListener(TakeTurn);
     }
 
     private void OnDisable()
     {
-       // UIManager.Instance.endTurnBtn.onClick.RemoveListener(OnTurnEnd);
     }
 
     public override void OnNetworkSpawn()
     {
-      //  GameManager.gM.currentPlayerId.OnValueChanged += StartTurnClientRpc;
     }
 
     public override void OnNetworkDespawn()
     {
-        GameManager.gM.currentPlayerId.OnValueChanged -= StartTurnClientRpc;
         GameManager.gM.players.Remove(this);
     }
 
@@ -77,7 +67,7 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && IsClient && IsOwner)
         {
-            OnTurnEnd();
+            TakeTurn();
         }
     }
 
@@ -102,7 +92,6 @@ public class Player : NetworkBehaviour
             cardsInHand.Add(currentCard);
             spacing++;
         }
-       
         SpriteHolder.sP.SetSpritesPosition(this);
     }
 
@@ -123,8 +112,6 @@ public class Player : NetworkBehaviour
     private void UpdateHandClientRpc()
     {
         int deckIndex = 0;
-        //foreach (var clientid in NetworkManager.Singleton.ConnectedClientsIds)
-        
 
         foreach (Player player in GameManager.gM.players)
         {
@@ -164,35 +151,25 @@ public class Player : NetworkBehaviour
 
         HandleStolenCardsServerRpc(newValOne_, newValTwo_, _senderId);
     }
+
     [ServerRpc(RequireOwnership =false)]
-    public void HandleStolenCardsServerRpc(NetworkCard newCardOne_,NetworkCard newCardTwo_,ulong _senderId)
+    public void HandleStolenCardsServerRpc(NetworkCard _newCardOne,NetworkCard _newCardTwo,ulong _senderId)
     {
-        GetPlayerById(_senderId).GiveCardsBackClientRpc(newCardOne_, newCardTwo_, GameManager.gM.TargetId(_senderId));
+        GetPlayerById(_senderId).GiveCardsBackClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
     }
 
     [ClientRpc]
     public void GiveCardsBackClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ClientRpcParams _PraesiId)
     {
-       
         networkHand.Add(_newValOne);
         networkHand.Add(_newValTwo);
 
         cardsInHand.ForEach(c => Destroy(c.gameObject));
-        //cardsInHand.
+
         SpawnCardsClientRpc();
     }
 
-    // this will contain clicking cards and checking wchich cards are viable to play
-    [ClientRpc]
-    private void StartTurnClientRpc(ulong previousValue, ulong newValue)
-    {
-        if (newValue == NetworkManager.Singleton.LocalClientId)
-        {
-            Debug.Log($"Player {newValue} is now current Player");
-        }
-        else
-            Debug.Log($"Not {NetworkManager.Singleton.LocalClientId}'s turn");
-    }
+    #region Gamelogic
 
     public bool IsValidCard(Card card)
     {
@@ -204,54 +181,65 @@ public class Player : NetworkBehaviour
         return cardsInHand.GroupBy(x => x.value).Any(g => g.Count() > 3);
     }
 
-    // btn press
-    public void OnTurnEnd()
+    public void TakeTurn()
     {
         if (!IsClient || !IsOwner || !IsCurrentPlayer()) return;
 
-
         if (selectedCards.Count == 0 || IsDone()) // pass
         {
-            GameManager.gM.SetLastAmountServerRpc(0);
-            GameManager.gM.SetLastCardServerRpc(0);
-            GameManager.gM.NextPlayerServerRpc();
-            SoundManager.Instance.CheckSound();
+            PassTurn();
             return;
         }
-
         // alredy checked for higher only need to check if equal
         if ((!AreEqualValue() || !AreEqualCount())&& !HansBomb())
         {
-            selectedCards.ForEach(card => card.Deselect()); ;
-            selectedCards.Clear();
-            SoundManager.Instance.CancelSound();
+            CancelMove();
             return;
-           
         }   
         else
-        {
-            GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
-            GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
-            GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
-            SoundManager.Instance.PlaySound();
-        }
-        // destroy cards locally
-        // remove card so the game logic knows when player ready
-        cardsInHandCounter-= selectedCards.Count;
+            PlayCards();
+        
         if (IsDone())
-        {
-            //SpriteHolder.sP.SetWinLooseImageClientRpc();
-            GameManager.gM.SetPlacementServerRpc();
-            GameManager.gM.RemovePlayerServerRpc(GameManager.gM.currentPlayerId.Value);
-        }
+            GameManager.gM.HandlePlayerDone();
+
+        EndTurn();
+    }
+
+    private void EndTurn()
+    {
+        GameManager.gM.NextPlayerServerRpc();
+        GameManager.gM.CheckGameOverServerRpc(); 
+    }
+
+    private void PlayCards()
+    {
+        GameManager.gM.SetLastCardServerRpc((int)selectedCards[0].value);
+        GameManager.gM.SetLastAmountServerRpc(selectedCards.Count);
+        GameManager.gM.HandleCardsToSpwawnServerRpc(GetSelectedColors(selectedCards));
+        SoundManager.Instance.PlaySound();
+
+        RemovePlayedcards();
+    }
+
+    private void RemovePlayedcards()
+    {
         selectedCards.ForEach(card => HandlePlayerCard(card));
         selectedCards.Clear();
-        
+    }
 
-        // setting new player
+    private void PassTurn()
+    {
+        GameManager.gM.SetLastAmountServerRpc(0);
+        GameManager.gM.SetLastCardServerRpc(0);
         GameManager.gM.NextPlayerServerRpc();
+        SoundManager.Instance.CheckSound();
+    }
 
-        GameManager.gM.CheckGameOverServerRpc();
+    private void CancelMove()
+    {
+        selectedCards.ForEach(card => card.Deselect()); ;
+        selectedCards.Clear();
+        SoundManager.Instance.CancelSound();
     }
 
     // ----------------------- Utils -----------------------
@@ -298,6 +286,34 @@ public class Player : NetworkBehaviour
             || GameManager.gM.lastCardPlayedAmount.Value == 0;
     }
 
+    public bool IsCurrentPlayer()
+    {
+        return GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId;
+    }
+
+    public bool IsDone()
+    {
+        if (cardsInHand.Count <= 0) return true;
+        return false;
+    }
+
+    public Card checkHand(int wish)
+    {
+        Card tmp = null;
+        foreach (var card in cardsInHand)
+        {
+            if ((int)card.value == wish)
+            {
+                tmp = card;
+                cardsInHand.Remove(card);
+                return tmp;
+            }
+        }
+        return tmp;
+    }
+    #endregion
+
+    #region Utils
     private void LogCards()
     {
         Debug.Log($"Player has the following {networkHand.Count} cards in Hand:");
@@ -316,30 +332,5 @@ public class Player : NetworkBehaviour
             Debug.Log("LocalClientId: " + NetworkManager.Singleton.LocalClientId + " " + networkCard.ToString());
         }
     }
-
-    public bool IsCurrentPlayer()
-    {
-        return GameManager.gM.currentPlayerId.Value == NetworkManager.Singleton.LocalClientId;
-    }
-
-    public bool IsDone()
-    {
-        if (cardsInHandCounter <= 0) return true;
-        return false;
-    }
-
-    public Card checkHand(int wish)
-    {
-        Card tmp = null;
-        foreach (var card in cardsInHand)
-        {
-            if ((int)card.value == wish)
-            {
-                tmp = card;
-                cardsInHand.Remove(card);
-                return tmp;
-            }
-        }
-        return tmp;
-    }
+    #endregion
 }
