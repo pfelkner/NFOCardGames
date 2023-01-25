@@ -51,8 +51,7 @@ public class Player : NetworkBehaviour
     private void Update()
     {
         UIManager.Instance.SetIsCurrentPlayerText(IsCurrentPlayer());
-           
-
+        
         // testing
         if (Input.GetKeyDown(KeyCode.T) && IsOwner)
         {
@@ -79,11 +78,6 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && IsClient && IsOwner)
         {
             OnTurnEnd();
-        }
-
-        if (Input.GetKeyDown(KeyCode.K) && IsClient && IsOwner)
-        {
-            Debug.Log("**********"+NetworkManager.Singleton.ConnectedClientsIds.Count+"***************");
         }
     }
 

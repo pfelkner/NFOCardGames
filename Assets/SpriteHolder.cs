@@ -91,8 +91,9 @@ public class SpriteHolder : NetworkBehaviour
             goS.Add(go);
         }
     }
+
     [ClientRpc]
-    public void SetCardsBackClientRpc()
+    public void ResetCardsInMiddleClientRpc()
     {
         for (int i = 0; i < goS.Count; i++)
         {

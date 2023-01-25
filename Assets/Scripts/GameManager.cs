@@ -51,56 +51,6 @@ public class GameManager : NetworkBehaviour
 
     public List<Player> playersFinished = new List<Player>();
 
-    
-
-    public struct NetworkCard : INetworkSerializable
-    {
-        public NetworkCard(int col = -1, int val = -1) {
-            color = col;
-            value = val;
-        }
-        public int color;
-        public int value;
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref color);
-            serializer.SerializeValue(ref value);
-        }
-
-        public override string ToString()
-        {
-            return $"{(Values)value} of {(Colors)color}";
-        }
-    }
-
-    public struct NetworkColors : INetworkSerializable
-    {
-
-        public NetworkColors(bool cl, bool sp, bool he, bool di)
-        {
-            club = cl;
-            spade = sp;
-            heart = he;
-            diamond = di;
-        }
-
-        public bool club;
-        public bool spade;
-        public bool heart;
-        public bool diamond;
-
-
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref club);
-            serializer.SerializeValue(ref spade);
-            serializer.SerializeValue(ref heart);
-            serializer.SerializeValue(ref diamond);
-        }
-
-    }
 
     private void Awake()
     {
@@ -109,29 +59,45 @@ public class GameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        lastCardPlayedValue.OnValueChanged += (int prevVal, int newVal) =>
-        {
-            UIManager.Instance.ChangeTextForPlayerValue((Values)newVal);
-            SpriteHolder.sP.cardsValue = newVal;
-        };
-        lastCardPlayedAmount.OnValueChanged += (int prevVal, int newVal) =>
-        {
-            UIManager.Instance.ChangeTextForPlayerInt(newVal);
-            SpriteHolder.sP.cardsAmount = newVal;
-        };
-      
-        rnd.OnValueChanged += ShuffleWithRandomClientRpc;
-        currentPlayerId.Value = 69420;
-        lastCardPlayedValue.Value = 0;
-        //index = playerIds.Count;
-        index = 0;
+        InitHandlers();
+        InitVariables();
         
     }
 
     public override void OnNetworkDespawn()
     {
+        lastCardPlayedValue.OnValueChanged -= OnLastCardPlayedValueChanged;
+        lastCardPlayedAmount.OnValueChanged -= OnLastCardPlayedAmountChanged;
         rnd.OnValueChanged -= ShuffleWithRandomClientRpc;
     }
+
+    private void InitVariables()
+    {
+        currentPlayerId.Value = 69420;
+        lastCardPlayedValue.Value = 0;
+        index = 0;
+    }
+
+    public void InitHandlers()
+    {
+        lastCardPlayedValue.OnValueChanged += OnLastCardPlayedValueChanged;
+        lastCardPlayedAmount.OnValueChanged += OnLastCardPlayedAmountChanged;
+
+        rnd.OnValueChanged += ShuffleWithRandomClientRpc;
+    }
+
+    private void OnLastCardPlayedValueChanged(int prevVal, int newVal)
+    {
+        UIManager.Instance.ChangeTextForPlayerValue((Values) newVal);
+        SpriteHolder.sP.cardsValue = newVal;
+    }
+
+    private void OnLastCardPlayedAmountChanged(int prevVal, int newVal)
+    {
+        UIManager.Instance.ChangeTextForPlayerInt(newVal);
+        SpriteHolder.sP.cardsAmount = newVal;
+    }
+
 
     //----------------------- Set Up ------------------------
 
@@ -190,7 +156,7 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void NextPlayerServerRpc()
     {
-        Debug.LogWarning($"I plaerids length = {playerIds.Count}; index = {index}");
+        // index has to be decreased instead of increased to avoid overflowing palyerids count
         //if (index - 1 >= 0)
         //    index--;
         //else
@@ -199,21 +165,25 @@ public class GameManager : NetworkBehaviour
             index++;
         else
             index = 0;
-        Debug.LogWarning($"II plaerids length = {playerIds.Count}; index = {index}");
+
         currentPlayerId.Value = playerIds[index];
 
         Player player = GetPlayerById(currentPlayerId.Value);
-        Debug.Log($"NextPlayerServerRpc called by {currentPlayerId.Value}: player is done is {player.IsDone()}; Index is {index}");
         if (player.IsDone())
         {
             NextPlayerServerRpc();
         }
-        // TODO make sure this is correct
+        ResetCardsInMiddle();
+    }
+
+    //
+    private void ResetCardsInMiddle()
+    {
         if (SpriteHolder.sP.goS.Count <= 0) return;
         
         if (SpriteHolder.sP.goS[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
         {
-            SpriteHolder.sP.SetCardsBackClientRpc();
+            SpriteHolder.sP.ResetCardsInMiddleClientRpc();
         }
     }
 
@@ -231,13 +201,12 @@ public class GameManager : NetworkBehaviour
         lastCardPlayedAmount.Value = value;
     }
 
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     //----------------------- Game/Round End  ------------------------
 
     [ServerRpc(RequireOwnership =false)]
     public void HandleCardsToSpwawnServerRpc(NetworkColors cols)
     {
-        SpriteHolder.sP.SetCardsBackClientRpc();
+        SpriteHolder.sP.ResetCardsInMiddleClientRpc();
         SpriteHolder.sP.SetCardInMiddleClientRpc(lastCardPlayedAmount.Value, lastCardPlayedValue.Value, cols);
     }
 
@@ -262,19 +231,12 @@ public class GameManager : NetworkBehaviour
             player_.cardsInHand.ForEach(_c => Destroy(_c.gameObject));
             player_.cardsInHand.Clear();
         }
-        SpriteHolder.sP.SetCardsBackClientRpc();
+        SpriteHolder.sP.ResetCardsInMiddleClientRpc();
     }
 
     public void SetPlayerCount()
     {
         playerCount = players.Count;
-    }
-
-    [ServerRpc]
-    private void ResetServerRpc()
-    {
-        placements.Clear();
-        lastCardPlayedValue.Value = 0;
     }
 
     public ClientRpcParams TargetId(ulong id)
@@ -292,7 +254,7 @@ public class GameManager : NetworkBehaviour
 
         playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
         Debug.Log($"playerIds lenght after reset: {playerIds.Count}");
-        playerCount = players.Count;
+        SetPlayerCount();
         lastCardPlayedValue.Value = 0;
         lastCardPlayedAmount.Value = 0;
 
@@ -368,10 +330,6 @@ public class GameManager : NetworkBehaviour
         playerIds.Remove(_id);
         Debug.LogWarning($"RemovePlayerServerRpc: count after remove = {NetworkManager.Singleton.ConnectedClientsIds.Count}");
     }
-
-    
-
-
 }
 
 
