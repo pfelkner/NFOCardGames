@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using static GameManager;
 using System.Linq;
+using System;
 
 public class Player : NetworkBehaviour
 {
@@ -143,6 +144,19 @@ public class Player : NetworkBehaviour
         c2.gameObject.transform.position = new Vector2(-15, -15);
 
         HandleStolenCardsServerRpc(newValOne_, newValTwo_, _senderId);
+    }
+    [ClientRpc]
+    internal void GiveCardsFromPlayerToSenderClientRpc(NetworkCard valOne_, NetworkCard valTwo_, ulong senderId_, ClientRpcParams clientRpcParams)
+    {
+        Card c1 = cardsInHand.Find(c => (int)c.value == valOne_.value && (int)c.color == valOne_.color);
+        cardsInHand.Remove(c1);
+        Destroy(c1.gameObject);
+
+        Card c2 = cardsInHand.Find(c => (int)c.value == valTwo_.value && (int)c.color == valTwo_.color);
+        cardsInHand.Remove(c2);
+        Destroy(c2.gameObject);
+
+        HandleStolenCardsServerRpc(valOne_, valTwo_, senderId_);
     }
 
     [ServerRpc(RequireOwnership =false)]

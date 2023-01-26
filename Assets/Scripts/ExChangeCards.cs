@@ -44,6 +44,7 @@ public class ExChangeCards : MonoBehaviour
 
     public void OnClickAdd()
     {
+        Debug.Log("OnClickAdd");
         if (counter == 0)
         {
             if (valuesToChoose.Count < 2)
@@ -63,6 +64,7 @@ public class ExChangeCards : MonoBehaviour
 
     public void OnClickRemove()
     {
+        Debug.Log("OnClickRemove");
 
         if (counter == 0)
         {
@@ -83,21 +85,21 @@ public class ExChangeCards : MonoBehaviour
             CardsToSteal();
         } else
         {
-            CardsToGe();
+            CardsToGet();
         }
     }
 
     public void CardsToSteal()
     {
-        GameManager.gM.RequestCard(valuesToChoose,true);
+        GameManager.gM.RequestCard(valuesToChoose);
         counter++;
         text.text = string.Empty;
         gameObject.SetActive(false);
      
     }
-    public void CardsToGe()
+    public void CardsToGet()
     {
-        GameManager.gM.RequestCard(valuesToRemove,false);
+        GameManager.gM.ReturnCards(valuesToRemove);
         gameObject.SetActive(false);
         counter = 0;
     }
