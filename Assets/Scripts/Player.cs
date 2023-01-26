@@ -30,11 +30,11 @@ public class Player : NetworkBehaviour
         UIManager.Instance.SetIsCurrentPlayerText(IsCurrentPlayer());
         
         // testing
-        if (Input.GetKeyDown(KeyCode.T) && IsOwner)
+        if (Input.GetKeyDown(KeyCode.T) && IsOwner && IsServer)
         {
             GameManager.gM.playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
             GameManager.gM.InitDeckClientRpc();
-            GameManager.gM.InitShuffle();
+            GameManager.gM.InitShuffleServerRpc();
             DealCards();
             GameManager.gM.SetFirstPlayerServerRpc();
 
@@ -67,6 +67,7 @@ public class Player : NetworkBehaviour
         // crate cards locally
         foreach (NetworkCard networkCard in newHand)
         {
+            Debug.LogWarning(networkCard.ToString());
             CreateCardInHand(networkCard);
             spacing++;
         }
@@ -92,10 +93,7 @@ public class Player : NetworkBehaviour
 
     internal void DealCards()
     {
-        if (IsOwner)
-        {
-            UpdateHandClientRpc();
-        }
+        UpdateHandClientRpc();
         foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
         {
             GameManager.GetPlayerById(uid).SpawnCardsClientRpc();
@@ -107,7 +105,7 @@ public class Player : NetworkBehaviour
     private void UpdateHandClientRpc()
     {
         int deckIndex = 0;
-
+        Debug.LogWarning("UpdateHandClientRpc");
         foreach (Player player in GameManager.gM.players)
         {
             player.networkHand.Clear();

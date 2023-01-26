@@ -13,7 +13,7 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<ulong> currentPlayerId = new NetworkVariable<ulong>(1000, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
 
     [Header("Setup")]
@@ -93,7 +93,8 @@ public class GameManager : NetworkBehaviour
     }
 
     // starts the shuffling process
-    public void InitShuffle()
+    [ServerRpc]
+    public void InitShuffleServerRpc()
     {
         for (int i = 0; i < 100; i++)
         {
@@ -105,7 +106,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void ShuffleWithRandomClientRpc(int previousValue, int newValue)
     {
-        Debug.Log("shuffle");
+        Debug.LogWarning("ShuffleWithRandomClientRpc");
         NetworkCard temp = networkDeck[newValue];
         networkDeck[newValue] = networkDeck[0];
         networkDeck[0] = temp;
@@ -231,7 +232,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log($"PrepareNextGameServerRpc on {NetworkManager.Singleton.LocalClientId}; Amount of clients: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
         playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
         ResetLastPlayed();
-        InitShuffle();
+        InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
         UIManager.Instance.TurnOnExchanger();
     }
