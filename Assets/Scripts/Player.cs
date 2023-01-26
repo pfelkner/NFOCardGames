@@ -327,8 +327,8 @@ public class Player : NetworkBehaviour
     #endregion
 
 
-
-    public void ExchangeCards()
+    [ClientRpc]
+    public void ExchangeCardsClientRpc(ClientRpcParams clientRpcParams)
     {
         UIManager.Instance.TurnOnExchanger();
     }

@@ -240,7 +240,7 @@ public class GameManager : NetworkBehaviour
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
-        GetPlayerById(placements[1]).ExchangeCards();
+        GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
         placements.Clear();
     }
 
