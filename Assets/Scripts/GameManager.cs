@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using static UnityEditor.Progress;
 using Random = UnityEngine.Random;
 
 public class GameManager : NetworkBehaviour
@@ -138,17 +140,7 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void NextPlayerServerRpc()
     {
-        // index has to be decreased instead of increased to avoid overflowing palyerids count
-        //if (index - 1 >= 0)
-        //    index--;
-        //else
-        //    index = playerIds.Count;
-        if (currenPlayerIndex + 1 < playerIds.Count)
-            currenPlayerIndex++;
-        else
-            currenPlayerIndex = 0;
-
-        currentPlayerId.Value = playerIds[currenPlayerIndex];
+        currentPlayerId.Value = playerIds[GetNextplayerId()];
 
         Player player = GetPlayerById(currentPlayerId.Value);
         if (player.IsDone())
@@ -156,6 +148,14 @@ public class GameManager : NetworkBehaviour
             NextPlayerServerRpc();
         }
         ResetCardsInMiddle();
+    }
+
+    private int GetNextplayerId()
+    {
+        currenPlayerIndex--;
+        if (currenPlayerIndex < 0)
+            currenPlayerIndex = playerIds.Count - 1;
+        return currenPlayerIndex;
     }
 
     //
