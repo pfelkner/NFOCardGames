@@ -125,16 +125,21 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void SetFirstPlayerServerRpc()
     {
+        Debug.Log("SetFirstPlayerServerRpc");
         NetworkClient currentPlayerNetworkClient;
         if (placements.Count == 0)
         {
-            // TODO first round: lowest heart, not host
+            Debug.Log($"This condition is only met in the first round");
             currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
             currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
-        } else
+        }
+        else
         {
-            // whoever came in last place takes first turn
+            Debug.Log($"Placements count {placements.Count}");
             currentPlayerId.Value = placements[placements.Count];
+            currenPlayerIndex = playerIds.FindIndex(id => id == currentPlayerId.Value);
+            Debug.LogWarning("############## index of currentplayer is " + currenPlayerIndex);
+            playerIds.ForEach( item => Debug.Log("##############" + item + "##############"));
         }
     }
 
@@ -234,7 +239,9 @@ public class GameManager : NetworkBehaviour
         ResetLastPlayed();
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
-        UIManager.Instance.TurnOnExchanger();
+        SetFirstPlayerServerRpc();
+        GetPlayerById(placements[1]).ExchangeCards();
+        placements.Clear();
     }
 
     private void ResetLastPlayed()

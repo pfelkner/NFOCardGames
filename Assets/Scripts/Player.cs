@@ -325,4 +325,11 @@ public class Player : NetworkBehaviour
         }
     }
     #endregion
+
+
+
+    public void ExchangeCards()
+    {
+        UIManager.Instance.TurnOnExchanger();
+    }
 }
