@@ -143,7 +143,7 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void StealCardsFromPlayerToSenderClientRpc(int _valOne, int _valTwo, ulong _senderId, ClientRpcParams  _targetId)
+    public void StealCardsClientRpc(int _valOne, int _valTwo, ulong _senderId, ClientRpcParams  _targetId)
     {
         Debug.Log("steal " + _valOne + "and" + _valTwo +"from"+_targetId+ "to"+ _senderId +"Shoult only be called in target client");
         // sind im arschloch
@@ -152,6 +152,7 @@ public class Player : NetworkBehaviour
 
        
         newValOne_ = networkHand.First(c => c.value == _valOne);
+        newValTwo_ = networkHand.First(c => c.value == _valTwo);
         // if no match -> error
         networkHand.Remove(newValOne_);
         Card c1 = cardsInHand.Find(c => (int)c.value == newValOne_.value && (int)c.color == newValOne_.color);
@@ -159,7 +160,6 @@ public class Player : NetworkBehaviour
         //Destroy(c1.gameObject);
         c1.gameObject.transform.position = new Vector2(-15, -15);
     
-        newValTwo_ = networkHand.First(c => c.value == _valTwo);
         networkHand.Remove(newValTwo_);
         Card c2 = cardsInHand.Find(c => (int)c.value == newValTwo_.value && (int)c.color == newValTwo_.color);
         cardsInHand.Remove(c2);
@@ -168,39 +168,59 @@ public class Player : NetworkBehaviour
 
         HandleStolenCardsServerRpc(newValOne_, newValTwo_, _senderId);
     }
-    [ClientRpc]
-    internal void GiveCardsFromPlayerToSenderClientRpc(NetworkCard valOne_, NetworkCard valTwo_, ulong senderId_, ClientRpcParams clientRpcParams)
-    {
-        Card c1 = cardsInHand.Find(c => (int)c.value == valOne_.value && (int)c.color == valOne_.color);
-        cardsInHand.Remove(c1);
-        c1.gameObject.transform.position = new Vector2(-15, -15);
-
-        Card c2 = cardsInHand.Find(c => (int)c.value == valTwo_.value && (int)c.color == valTwo_.color);
-        cardsInHand.Remove(c2);
-        c2.gameObject.transform.position = new Vector2(-15, -15);
-
-        HandleStolenCardsServerRpc(valOne_, valTwo_, senderId_);
-    }
 
     [ServerRpc(RequireOwnership =false)]
     public void HandleStolenCardsServerRpc(NetworkCard _newCardOne,NetworkCard _newCardTwo,ulong _senderId)
     {
         Debug.Log("HandleStolenCardsServerRpc");
-        GetPlayerById(_senderId).GiveCardsBackClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
+        GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
     }
 
     [ClientRpc]
-    public void GiveCardsBackClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ClientRpcParams _PraesiId)
+    public void AddToHandClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ClientRpcParams _PraesiId)
     {
         Debug.Log("GiveCardsBackClientRpc");
         networkHand.Add(_newValOne);
         networkHand.Add(_newValTwo);
 
         cardsInHand.ForEach(c => Destroy(c.gameObject));
+        cardsInHand.Clear();
 
         SpawnCardsClientRpc();
     }
 
+    [ClientRpc]
+    internal void GiveCardsClientRpc(int _valOne, int _valTwo, ulong senderId_, ClientRpcParams clientRpcParams)
+    {
+        if (!IsOwner) return;
+        Debug.Log($"GiveCardsClientRpc on {NetworkManager.Singleton.LocalClientId}");
+        NetworkCard newValOne_ = new NetworkCard();
+        NetworkCard newValTwo_ = new NetworkCard();
+
+        List<int> available = new List<int>();
+        networkHand.ForEach(c => available.Add(c.value));
+        if (available.Contains(_valOne))
+        {
+            Debug.Log($"Val One is available");
+            newValOne_ = networkHand.First(c => c.value == _valOne);
+            networkHand.Remove(newValOne_);
+            LogCards();
+        }
+        if (available.Contains(_valTwo))
+        {
+            Debug.Log($"Val Two is available");
+            newValTwo_ = networkHand.First(c => c.value == _valTwo);
+            networkHand.Remove(newValTwo_);
+            LogCards();
+        }
+
+        cardsInHand.ForEach(c => c.gameObject.SetActive(false));
+        cardsInHand.Clear();
+        SpawnCardsClientRpc();
+        Debug.Log($"Found the following 2 cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
+        GameManager.gM.ResetPlacementsServerRpc();
+        HandleStolenCardsServerRpc(newValOne_, newValTwo_, senderId_);
+    }
     #region Gamelogic
 
     public bool IsValidCard(Card card)

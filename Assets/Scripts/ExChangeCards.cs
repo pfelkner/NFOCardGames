@@ -53,15 +53,21 @@ public class ExChangeCards : MonoBehaviour
         }
     }
 
+    private void ResetSelection()
+    {
+        for (int i = selectedCards.Count -1; i >= 0; i--)
+        {
+            selectedCards[i].Deselect();
+        }
+    }
+
     public void CardsToSteal()
     {
         List<Values> vals_ = new List<Values>();
         selectedCards.ForEach(c => vals_.Add(c.value));
-        GameManager.gM.RequestCard(vals_);
+        GameManager.gM.GetCards(vals_);
         counter++;
-      //  text.text = string.Empty;
-        gameObject.SetActive(false);
-     
+        ResetSelection();
     }
     public void CardsToGet()
     {
@@ -70,6 +76,7 @@ public class ExChangeCards : MonoBehaviour
         GameManager.gM.ReturnCards(vals_);
         counter = 0;
         gameObject.SetActive(false);
+        ResetSelection();
     }
 
     

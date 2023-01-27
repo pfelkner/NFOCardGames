@@ -7722,12 +7722,48 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.size
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: lastCardPlayed.Array.data[0]
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: playedCardList.Array.data[0]
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[0]
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[1]
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[2]
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[3]
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[4]
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[5]
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[6]
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[7]
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: lastCardPlayedValue.m_InternalValue

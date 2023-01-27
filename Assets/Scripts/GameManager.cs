@@ -260,7 +260,7 @@ public class GameManager : NetworkBehaviour
     }
    
 
-    public void RequestCard(List<Values> _vals)
+    public void GetCards(List<Values> _vals)
     {
         // erste mal is true, der pr�si will karten , das zweite mal false , der pr�si gibt karten
         // der unterschied ist nur dass die empf�nger sender getauscht werden
@@ -288,14 +288,14 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RequestCardsServerRpc(int _valOne, int _valTwo, ulong _senderId, ulong _targetId)
     {
-        GetPlayerById(_targetId).StealCardsFromPlayerToSenderClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
+        GetPlayerById(_targetId).StealCardsClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
     }
+
+
 
 
     public void ReturnCards(List<Values> _vals)
     {
-        // erste mal is true, der pr�si will karten , das zweite mal false , der pr�si gibt karten
-        // der unterschied ist nur dass die empf�nger sender getauscht werden
         ulong targetId_;
         ulong senderId_;
 
@@ -306,22 +306,26 @@ public class GameManager : NetworkBehaviour
         int valOne_ = (int)_vals[0];
         int valTwo_ = (int)_vals[1];
 
-        NetworkCard newValOne_ = new NetworkCard();
-        NetworkCard newValTwo_ = new NetworkCard();
+        //NetworkCard newValOne_ = new NetworkCard();
+        //NetworkCard newValTwo_ = new NetworkCard();
 
-        newValOne_ = GetPlayerById(senderId_).networkHand.Find(c => c.value == valOne_);
-        newValTwo_ = GetPlayerById(senderId_).networkHand.Find(c => c.value == valTwo_);
+        //newValOne_ = GetPlayerById(senderId_).networkHand.Find(c => c.value == valOne_);
+        //newValTwo_ = GetPlayerById(senderId_).networkHand.Find(c => c.value == valTwo_);
 
         Debug.Log("Target ID: " + targetId_);
 
-        if (IsOwner)
-            GetPlayerById(targetId_).GiveCardsFromPlayerToSenderClientRpc(newValOne_, newValTwo_, senderId_, TargetId(targetId_));
+        ReturnCardsServerRpc(valOne_, valTwo_, senderId_, targetId_);
 
         // finde arsch
         // values entpacken
         // arsch karten entnehmen 
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void ReturnCardsServerRpc(int _valOne, int _valTwo, ulong _senderId, ulong _targetId)
+    {
+        GetPlayerById(_targetId).GiveCardsClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
+    }
 
     //Utils
 
@@ -374,6 +378,20 @@ public class GameManager : NetworkBehaviour
     {
         SetPlacementServerRpc();
         RemovePlayerIdServerRpc(currentPlayerId.Value);
+    }
+
+    [ServerRpc(RequireOwnership =false)]
+    internal void ResetPlacementsServerRpc()
+    {
+        placements.Clear();
+        ResetPlacementsClientRpc();
+    }
+
+    [ClientRpc]
+    private void ResetPlacementsClientRpc()
+    {
+        if (!IsServer)
+            placements.Clear();
     }
 }
 
