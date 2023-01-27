@@ -268,6 +268,7 @@ public class GameManager : NetworkBehaviour
         ulong senderId_;
 
         targetId_ = placements[placements.Count];
+
         senderId_ = placements[1];
 
        
@@ -277,12 +278,17 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("Target ID: " + targetId_);
 
-        if(IsOwner)
-            GetPlayerById(targetId_).StealCardsFromPlayerToSenderClientRpc(valOne_, valTwo_, senderId_, TargetId(targetId_));
+        RequestCardsServerRpc(valOne_, valTwo_, senderId_, targetId_);
 
         // finde arsch
         // values entpacken
         // arsch karten entnehmen 
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestCardsServerRpc(int _valOne, int _valTwo, ulong _senderId, ulong _targetId)
+    {
+        GetPlayerById(_targetId).StealCardsFromPlayerToSenderClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
     }
 
 
@@ -333,7 +339,9 @@ public class GameManager : NetworkBehaviour
     public void SetPlacementServerRpc()
     {
         int placement = placements.Count +1;
-        placements.Add(placement, currentPlayerId.Value);
+        //placements.Add(placement, currentPlayerId.Value);
+        ulong test = GetPlayerById(currentPlayerId.Value).OwnerClientId;
+        placements.Add(placement, test);
         LogPlacements();
     }
 

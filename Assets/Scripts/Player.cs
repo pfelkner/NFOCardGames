@@ -57,6 +57,29 @@ public class Player : NetworkBehaviour
         {
             TakeTurn();
         }
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (IsOwner)
+                TestServerRpc((ulong) 0);
+        }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            if (IsOwner)
+                TestServerRpc((ulong) 1);
+        }
+    }
+
+
+    [ServerRpc]
+    public void TestServerRpc(ulong id)
+    {
+        TestClientRpc(GameManager.gM.TargetId(id));
+    }
+
+    [ClientRpc]
+    public void TestClientRpc(ClientRpcParams clientRpcParams)
+    {
+        Debug.Log("+#+#+#+#+#+#+#+#+#+#");
     }
 
 
@@ -162,12 +185,14 @@ public class Player : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void HandleStolenCardsServerRpc(NetworkCard _newCardOne,NetworkCard _newCardTwo,ulong _senderId)
     {
+        Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).GiveCardsBackClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
     }
 
     [ClientRpc]
     public void GiveCardsBackClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ClientRpcParams _PraesiId)
     {
+        Debug.Log("GiveCardsBackClientRpc");
         networkHand.Add(_newValOne);
         networkHand.Add(_newValTwo);
 
