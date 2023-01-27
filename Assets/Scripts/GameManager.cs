@@ -203,6 +203,15 @@ public class GameManager : NetworkBehaviour
     {
         if (playerIds.Count > 1) return;
         SetPlacementServerRpc();
+
+        foreach (KeyValuePair<int, ulong> placement in placements)
+        {
+            
+          UpdatePlacementClientRpc(placement.Key, placement.Value);
+            
+        }
+        
+        
         EndRoundClientRpc();
         PrepareNextGameServerRpc();
     }
@@ -326,6 +335,16 @@ public class GameManager : NetworkBehaviour
         int placement = placements.Count +1;
         placements.Add(placement, currentPlayerId.Value);
         LogPlacements();
+    }
+
+
+    [ClientRpc]
+    public void UpdatePlacementClientRpc(int _placement, ulong _playerId)
+    {
+        if (!IsServer)
+        {
+            placements.Add(_placement, _playerId);
+        }
     }
 
     public void LogPlacements()

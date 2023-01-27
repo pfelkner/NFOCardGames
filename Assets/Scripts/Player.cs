@@ -150,11 +150,11 @@ public class Player : NetworkBehaviour
     {
         Card c1 = cardsInHand.Find(c => (int)c.value == valOne_.value && (int)c.color == valOne_.color);
         cardsInHand.Remove(c1);
-        Destroy(c1.gameObject);
+        c1.gameObject.transform.position = new Vector2(-15, -15);
 
         Card c2 = cardsInHand.Find(c => (int)c.value == valTwo_.value && (int)c.color == valTwo_.color);
         cardsInHand.Remove(c2);
-        Destroy(c2.gameObject);
+        c2.gameObject.transform.position = new Vector2(-15, -15);
 
         HandleStolenCardsServerRpc(valOne_, valTwo_, senderId_);
     }

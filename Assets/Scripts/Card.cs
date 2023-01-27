@@ -45,9 +45,6 @@ public class Card : MonoBehaviour
         cardRenderer.enabled = true;
         colorRenderer.sprite = SpriteHolder.sh.colorSprites[(int)color];
         valueRenderer.sprite = SpriteHolder.sh.valueSprites[(int)value];
-
-
-
     }
 
  

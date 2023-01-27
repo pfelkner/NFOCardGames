@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class ExChangeCards : MonoBehaviour
 {
+    public static ExChangeCards Instance;
    
     public List<Values> valuesToChoose;
     public List<Values> valuesToRemove;
@@ -12,29 +13,17 @@ public class ExChangeCards : MonoBehaviour
     public GameObject addBtn;
     public GameObject removeBtn;
 
-    [SerializeField]
-    CardUI cardUI;
+    public List<CardUI> selectedCards;
     public TextMeshProUGUI text;
 
     public int counter;
 
-    private void Update()
+
+    private void Awake()
     {
-        string newText = string.Empty;
-        foreach (Values item in valuesToChoose)
-        {
-            newText += item.ToString() +" ";
-        }
-        text.text = newText;
+        if (Instance == null) Instance = this;
     }
-
-    public void SelectCards(CardUI _cardUI)
-    {
-        SetButtons(true);
-        cardUI = _cardUI;
-    }
-
-
+ 
 
     public void SetButtons(bool _flag)
     {
@@ -42,44 +31,19 @@ public class ExChangeCards : MonoBehaviour
         removeBtn.SetActive(_flag);
     }
 
-    public void OnClickAdd()
+
+    public void AddToSelected(CardUI _cardUI)
     {
-        Debug.Log("OnClickAdd");
-        if (counter == 0)
-        {
-            if (valuesToChoose.Count < 2)
-            {
-                valuesToChoose.Add(cardUI.value);
-            }
-        }
-        else
-        {
-            if (valuesToRemove.Count < 2)
-            {
-                valuesToRemove.Add(cardUI.value);
-            }
-        }
-    
+        selectedCards.Add(_cardUI);
     }
-
-    public void OnClickRemove()
+    public void RemoveSelected(CardUI _cardUI)
     {
-        Debug.Log("OnClickRemove");
-
-        if (counter == 0)
-        {
-            valuesToChoose.Remove(valuesToChoose.First(c => c == cardUI.value));
-        }
-        else
-        {
-            valuesToChoose.Remove(valuesToRemove.First(c => c == cardUI.value));
-        }
-
-      
+        selectedCards.Remove(_cardUI);
     }
 
     public void SentCards()
     {
+       // selectedCards.ForEach(c => c.Deselect());
         if (counter == 0)
         {
             CardsToSteal();
@@ -91,17 +55,21 @@ public class ExChangeCards : MonoBehaviour
 
     public void CardsToSteal()
     {
-        GameManager.gM.RequestCard(valuesToChoose);
+        List<Values> vals_ = new List<Values>();
+        selectedCards.ForEach(c => vals_.Add(c.value));
+        GameManager.gM.RequestCard(vals_);
         counter++;
-        text.text = string.Empty;
+      //  text.text = string.Empty;
         gameObject.SetActive(false);
      
     }
     public void CardsToGet()
     {
-        GameManager.gM.ReturnCards(valuesToRemove);
-        gameObject.SetActive(false);
+        List<Values> vals_ = new List<Values>();
+        selectedCards.ForEach(c => vals_.Add(c.value));
+        GameManager.gM.ReturnCards(vals_);
         counter = 0;
+        gameObject.SetActive(false);
     }
 
     
