@@ -70,8 +70,8 @@ public class SpriteHolder : NetworkBehaviour
     public void SetCardInMiddleClientRpc(int amount, int value, NetworkColors col)
     {
         //Debug.LogWarning($"Inside set in middle {GameManager.gM.lastCardPlayedAmount.Value};");
-        Debug.LogWarning($"###### {ParseNetworkCols(col).Count == amount}########");
-        List<Colors> test = ParseNetworkCols(col);
+        Debug.LogWarning($"###### {ParseNetworkCols(col).Count} : {amount}########");
+        List<Colors> newColors = ParseNetworkCols(col);
         for (int i = 0; i < amount; i++)
         {   
             GameObject go = Instantiate(cardPrefab, new Vector2(4.4f+i+spacing+(Random.Range(0.5f,0.5f)), 4f+(Random.Range(-0.3f, 0.5f))), Quaternion.Euler(0.0f, 0.0f, Random.Range(-10f, 10f)));
@@ -83,7 +83,7 @@ public class SpriteHolder : NetworkBehaviour
 
             card.isPlayed = true;
 
-            card.color = test[i];
+            card.color = newColors[i];
 
             card.ownerId = GameManager.gM.currentPlayerId.Value;
             Debug.LogWarning($"cast{(Values)cardsValue} :{cardsValue}");
