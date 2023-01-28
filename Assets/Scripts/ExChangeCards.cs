@@ -78,8 +78,4 @@ public class ExChangeCards : MonoBehaviour
         gameObject.SetActive(false);
         ResetSelection();
     }
-
-    
-
-
 }

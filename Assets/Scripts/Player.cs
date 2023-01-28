@@ -172,7 +172,7 @@ public class Player : NetworkBehaviour
             LogCards();
             cardTwo = true;
         }
-        if (!cardOne && !cardTwo) return;
+        if (!cardOne && !cardTwo) HandleStolenCardsServerRpc();
         else if (cardOne && cardTwo)
         {
             cardsInHand.ForEach(c => c.gameObject.SetActive(false));
@@ -199,18 +199,32 @@ public class Player : NetworkBehaviour
         }
     }
 
+    private void HandleStolenCardsServerRpc()
+    {
+        GameManager.gM.cardsExchanged.Value = 0;
+        if (GameManager.gM.GetPlayerPlacement() == 2)
+            GameManager.gM.cardsExchanged.Value = -1;
+    }
+
     [ServerRpc(RequireOwnership =false)]
     public void HandleStolenCardsServerRpc(NetworkCard _newCardOne,NetworkCard _newCardTwo,ulong _senderId)
     {
+        GameManager.gM.cardsExchanged.Value = 2;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
+        if (GameManager.gM.GetPlayerPlacement() == 2)
+            GameManager.gM.cardsExchanged.Value = -1;
     }
     [ServerRpc(RequireOwnership = false)]
     public void HandleStolenCardsServerRpc(NetworkCard _newCardOne, ulong _senderId)
     {
+        GameManager.gM.cardsExchanged.Value = 1;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
+        if (GameManager.gM.GetPlayerPlacement() == 2)
+            GameManager.gM.cardsExchanged.Value = -1;
     }
+
 
     [ClientRpc]
     public void AddToHandClientRpc(NetworkCard _newValOne, NetworkCard _newValTwo, ClientRpcParams _PraesiId)

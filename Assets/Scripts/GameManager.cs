@@ -15,6 +15,7 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> lastCardPlayedValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> lastCardPlayedAmount = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkVariable<int> rnd = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> cardsExchanged = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public List<NetworkCard> networkDeck = new List<NetworkCard>();
 
     [Header("Setup")]
@@ -409,7 +410,7 @@ public class GameManager : NetworkBehaviour
             placements.Clear();
     }
 
-    private int GetPlayerPlacement()
+    public int GetPlayerPlacement()
     {
         foreach (KeyValuePair<int, ulong> item in placements)
         {
