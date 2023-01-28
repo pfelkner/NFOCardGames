@@ -14,7 +14,8 @@ public class CardUI : MonoBehaviour, IPointerDownHandler
 
     private void SelectCard()
     {
-        if (ExChangeCards.Instance.selectedCards.Count >= 2) return;
+        int num_ =GameManager.gM.GetWishesAmount();
+        if (ExChangeCards.Instance.selectedCards.Count >= num_) return;
         RectTransform trans_ = gameObject.GetComponent<RectTransform>();
         orginalPos = trans_.anchoredPosition;
         trans_.anchoredPosition = orginalPos + Vector2.up * 30;

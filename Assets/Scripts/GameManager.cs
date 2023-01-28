@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Netcode;
 using UnityEngine;
 using static UnityEditor.Progress;
@@ -271,9 +272,19 @@ public class GameManager : NetworkBehaviour
 
         senderId_ = placements[1];
 
-       
-        int valOne_ = (int)_vals[0];
-        int valTwo_ = (int)_vals[1];
+        int valOne_ = -1;
+        int valTwo_ = -1;
+
+        if (GetWishesAmount() == 2)
+        {
+            valOne_ = (int)_vals[0];
+            valTwo_ = (int)_vals[1];
+            
+        } else if (GetWishesAmount() == 1)
+        {
+            valOne_ = (int)_vals[0];
+        }
+        
 
 
         Debug.Log("Target ID: " + targetId_);
@@ -290,6 +301,10 @@ public class GameManager : NetworkBehaviour
     {
         GetPlayerById(_targetId).StealCardsClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
     }
+
+ 
+
+
 
 
 
@@ -392,6 +407,31 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer)
             placements.Clear();
+    }
+
+    private int GetPlayerPlacement()
+    {
+        foreach (KeyValuePair<int, ulong> item in placements)
+        {
+            if (item.Value == NetworkManager.Singleton.LocalClientId)
+            {
+                return item.Key;
+            }
+        } return -1;
+    }
+
+    public int GetWishesAmount()
+    {
+        int num_ = GetPlayerPlacement();
+        if (num_ > 0 && num_ == 1)
+        {
+            return 2;
+        }
+        else if (num_ > 0 && num_ == 2)
+        {
+            return 1;
+        }
+        else return 0;
     }
 }
 
