@@ -74,6 +74,11 @@ public class UIManager : MonoBehaviour
     {
         exchangerGo.SetActive(true);
     }
+    public void TurnOffExchanger()
+    {
+        ExChangeCards.Instance.ResetSelection();
+        exchangerGo.SetActive(false);
+    }
 
 
 }

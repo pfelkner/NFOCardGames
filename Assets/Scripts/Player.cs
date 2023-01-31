@@ -67,6 +67,10 @@ public class Player : NetworkBehaviour
             if (IsOwner)
                 TestServerRpc((ulong) 1);
         }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            GameManager.gM.ResetPlacementsServerRpc();
+        }
     }
 
 
@@ -154,14 +158,17 @@ public class Player : NetworkBehaviour
 
         // if no match -> error
         List<int> available = new List<int>();
+
         networkHand.ForEach(c => available.Add(c.value));
+
         if (available.Contains(_valOne) && _valOne > 0)
         {
             Debug.Log($"Val One is available");
             newValOne_ = networkHand.First(c => c.value == _valOne);
             networkHand.Remove(newValOne_);
+            available.Remove(_valOne);
             LogCards();
-           cardOne = true;
+            cardOne = true;
         }
         // seven has value 2
         if (available.Contains(_valTwo) && _valTwo > 0)
@@ -169,6 +176,7 @@ public class Player : NetworkBehaviour
             Debug.Log($"Val Two is available");
             newValTwo_ = networkHand.First(c => c.value == _valTwo);
             networkHand.Remove(newValTwo_);
+            available.Remove(_valTwo);
             LogCards();
             cardTwo = true;
         }
@@ -186,7 +194,7 @@ public class Player : NetworkBehaviour
             cardsInHand.ForEach(c => c.gameObject.SetActive(false));
             cardsInHand.Clear();
             SpawnCardsClientRpc();
-            Debug.Log($"Found the following 2 cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
+            Debug.Log($"Found the following 1 cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
             HandleStolenCardsServerRpc(newValOne_, _senderId);
         }
         else if (!cardOne && cardTwo)
@@ -194,16 +202,16 @@ public class Player : NetworkBehaviour
             cardsInHand.ForEach(c => c.gameObject.SetActive(false));
             cardsInHand.Clear();
             SpawnCardsClientRpc();
-            Debug.Log($"Found the following 2 cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
+            Debug.Log($"Found the following  cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
             HandleStolenCardsServerRpc(newValTwo_, _senderId);
         }
     }
 
+    [ServerRpc]
     private void HandleStolenCardsServerRpc()
     {
         GameManager.gM.cardsExchanged.Value = 0;
-        if (GameManager.gM.GetPlayerPlacement() == 2)
-            GameManager.gM.cardsExchanged.Value = -1;
+        UIManager.Instance.TurnOffExchanger();
     }
 
     [ServerRpc(RequireOwnership =false)]
@@ -212,8 +220,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 2;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
-        if (GameManager.gM.GetPlayerPlacement() == 2)
-            GameManager.gM.cardsExchanged.Value = -1;
+ 
     }
     [ServerRpc(RequireOwnership = false)]
     public void HandleStolenCardsServerRpc(NetworkCard _newCardOne, ulong _senderId)
@@ -221,8 +228,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 1;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
-        if (GameManager.gM.GetPlayerPlacement() == 2)
-            GameManager.gM.cardsExchanged.Value = -1;
+       
     }
 
 
@@ -248,7 +254,7 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    internal void GiveCardsClientRpc(int _valOne, int _valTwo, ulong _senderId, ClientRpcParams clientRpcParams)
+    internal void ReturnCardsClientRpc(int _valOne, int _valTwo, ulong _senderId, ClientRpcParams clientRpcParams)
     {
         if (!IsOwner) return;
         bool cardOne = false, cardTwo = false;
@@ -277,7 +283,10 @@ public class Player : NetworkBehaviour
             LogCards();
             cardTwo = true;
         }
+
+        Debug.Log(cardOne + ":" + cardTwo);
         if (!cardOne && !cardTwo) return;
+
         else if (cardOne && cardTwo)
         {
             cardsInHand.ForEach(c => c.gameObject.SetActive(false));
@@ -302,6 +311,7 @@ public class Player : NetworkBehaviour
             Debug.Log($"Found the following 2 cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
             HandleStolenCardsServerRpc(newValTwo_, _senderId);
         }
+        Debug.Log(cardOne + ":" + cardTwo);
     }
     #region Gamelogic
 

@@ -143,6 +143,7 @@ public class GameManager : NetworkBehaviour
             Debug.LogWarning("############## index of currentplayer is " + currenPlayerIndex);
             playerIds.ForEach( item => Debug.Log("##############" + item + "##############"));
         }
+        
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -252,7 +253,7 @@ public class GameManager : NetworkBehaviour
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
         GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
-        //placements.Clear();
+        
     }
 
     private void ResetLastPlayed()
@@ -318,9 +319,22 @@ public class GameManager : NetworkBehaviour
         targetId_ = placements[1];
         senderId_ = placements[placements.Count];
 
+        int valOne_ = 0;
+        int valTwo_ = 0;
 
-        int valOne_ = (int)_vals[0];
-        int valTwo_ = (int)_vals[1];
+        if (cardsExchanged.Value == 0)
+        {
+            return;
+        }
+        if (cardsExchanged.Value == 1)
+        {
+            valOne_ = (int)_vals[0];
+        } else if(cardsExchanged.Value == 2)
+        {
+            valOne_ = (int)_vals[0];
+            valTwo_ = (int)_vals[1];
+        }
+
 
         //NetworkCard newValOne_ = new NetworkCard();
         //NetworkCard newValTwo_ = new NetworkCard();
@@ -340,9 +354,13 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void ReturnCardsServerRpc(int _valOne, int _valTwo, ulong _senderId, ulong _targetId)
     {
-        GetPlayerById(_targetId).GiveCardsClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
+        GetPlayerById(_targetId).ReturnCardsClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
+        cardsExchanged.Value = -1;
+
     }
 
+
+    
     //Utils
 
     public Dictionary<int,ulong> GetPlacement()
@@ -424,10 +442,12 @@ public class GameManager : NetworkBehaviour
     public int GetWishesAmount()
     {
         int num_ = GetPlayerPlacement();
+        // präsi
         if (num_ > 0 && num_ == 1)
         {
             return 2;
         }
+        // vize präse
         else if (num_ > 0 && num_ == 2)
         {
             return 1;

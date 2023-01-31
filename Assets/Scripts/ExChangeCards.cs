@@ -53,7 +53,7 @@ public class ExChangeCards : MonoBehaviour
         }
     }
 
-    private void ResetSelection()
+    public void ResetSelection()
     {
         for (int i = selectedCards.Count -1; i >= 0; i--)
         {
@@ -68,14 +68,21 @@ public class ExChangeCards : MonoBehaviour
         GameManager.gM.GetCards(vals_);
         counter++;
         ResetSelection();
+       
     }
     public void CardsToGet()
     {
+
         List<Values> vals_ = new List<Values>();
         selectedCards.ForEach(c => vals_.Add(c.value));
         GameManager.gM.ReturnCards(vals_);
-        counter = 0;
-        gameObject.SetActive(false);
+        if(GameManager.gM.cardsExchanged.Value <= -1)
+        {
+            counter = 0;
+            gameObject.SetActive(false);
+        }
         ResetSelection();
+
+
     }
 }
