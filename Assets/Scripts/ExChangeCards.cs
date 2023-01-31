@@ -13,17 +13,31 @@ public class ExChangeCards : MonoBehaviour
     public GameObject addBtn;
     public GameObject removeBtn;
 
-    public List<CardUI> selectedCards;
+    public List<CardUI> cardsToSteal;
+    private List<Card> cardsToReturn;
     public TextMeshProUGUI text;
-
-    public int counter;
-
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
     }
- 
+
+    public void Update()
+    {
+        if (GameManager.gM.state == State.Stealing || GameManager.gM.state == State.Returning)
+        {
+            RectTransform trans_ = gameObject.GetComponent<RectTransform>();
+            trans_.anchoredPosition = new Vector2(-12, 31);
+            Debug.Log($"Current State {GameManager.gM.state}");
+        } else
+        {
+            RectTransform trans_ = gameObject.GetComponent<RectTransform>();
+            trans_.anchoredPosition = new Vector2(-600, -600);
+            Debug.Log($"ELSE Current State {GameManager.gM.state}");
+        }
+
+    }
+
 
     public void SetButtons(bool _flag)
     {
@@ -34,55 +48,51 @@ public class ExChangeCards : MonoBehaviour
 
     public void AddToSelected(CardUI _cardUI)
     {
-        selectedCards.Add(_cardUI);
+        cardsToSteal.Add(_cardUI);
     }
     public void RemoveSelected(CardUI _cardUI)
     {
-        selectedCards.Remove(_cardUI);
+        cardsToSteal.Remove(_cardUI);
     }
 
     public void SentCards()
     {
-       // selectedCards.ForEach(c => c.Deselect());
-        if (counter == 0)
+       // cardsToSteal.ForEach(c => c.Deselect());
+        if (GameManager.gM.state == State.Stealing)
         {
-            CardsToSteal();
-        } else
+            StealCards();
+        } else if (GameManager.gM.state == State.Returning)
         {
-            CardsToGet();
+            ReturnCards();
         }
     }
 
     public void ResetSelection()
     {
-        for (int i = selectedCards.Count -1; i >= 0; i--)
+        for (int i = cardsToSteal.Count -1; i >= 0; i--)
         {
-            selectedCards[i].Deselect();
+            cardsToSteal[i].Deselect();
         }
     }
 
-    public void CardsToSteal()
+    public void StealCards()
     {
         List<Values> vals_ = new List<Values>();
-        selectedCards.ForEach(c => vals_.Add(c.value));
+        cardsToSteal.ForEach(c => vals_.Add(c.value));
         GameManager.gM.GetCards(vals_);
-        counter++;
         ResetSelection();
        
     }
-    public void CardsToGet()
+    public void ReturnCards()
     {
-
         List<Values> vals_ = new List<Values>();
-        selectedCards.ForEach(c => vals_.Add(c.value));
+        cardsToReturn = GameManager.gM.GetLocalPlayer().GetSelectedCards();
+        cardsToReturn.ForEach(c => vals_.Add(c.value));
         GameManager.gM.ReturnCards(vals_);
-        if(GameManager.gM.cardsExchanged.Value <= -1)
-        {
-            counter = 0;
-            gameObject.SetActive(false);
-        }
-        ResetSelection();
+    }
 
-
+    public void Deactivate()
+    {
+        gameObject.SetActive(false);
     }
 }

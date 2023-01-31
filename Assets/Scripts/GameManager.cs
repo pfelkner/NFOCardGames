@@ -25,6 +25,7 @@ public class GameManager : NetworkBehaviour
     [Header("Control")]
     public List<Player> players;
     public List<ulong> playerIds = new List<ulong>();
+    [SerializeField] private Player localPlayer;
 
     [Header("DeckInfo")]
     [SerializeField] private List<Colors> colorsAvaliable;
@@ -36,6 +37,8 @@ public class GameManager : NetworkBehaviour
     private Dictionary<int, ulong> placements = new Dictionary<int, ulong>();
     private int currenPlayerIndex;
     private int playerCount;
+    public State state;
+    
 
     private void Awake()
     {
@@ -46,7 +49,7 @@ public class GameManager : NetworkBehaviour
     {
         InitHandlers();
         InitVariables();
-        
+        state = Transition(State.PreGame, true);
     }
 
     public override void OnNetworkDespawn()
@@ -54,6 +57,45 @@ public class GameManager : NetworkBehaviour
         lastCardPlayedValue.OnValueChanged -= OnLastCardPlayedValueChanged;
         lastCardPlayedAmount.OnValueChanged -= OnLastCardPlayedAmountChanged;
         rnd.OnValueChanged -= ShuffleWithRandomClientRpc;
+    }
+
+    public State ChangeState(State _state, bool _isDone) =>
+       state switch
+       {
+           State.PreGame => Transition(State.Playing, _isDone),
+           State.Playing => Transition(State.PostGame, _isDone),
+           State.PostGame => Transition(State.Stealing, _isDone),
+           State.Stealing => Transition(State.Returning, _isDone),
+           State.Returning => Transition(State.PreGame, _isDone),// just in case of false bool state gets reset to stealing
+           _ => throw new ArgumentException("Invalid enum value for state", nameof(state)),
+       };
+
+    // pregame -> playing
+    // playing -> postgame
+    // postgame -> stealing
+    // stealing -> returning
+    // returning -> pregame
+    //           -> stealing
+
+    public State Transition(State _newState, bool _isDone)
+    {
+        Debug.Log($"New state: {_newState}");
+        if (!_isDone)
+            return State.Stealing;
+        return _newState;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ChangeStateServerRpc()
+    {
+        //state = ChangeState(state, true);
+        ChangeStateClientRpc();
+    }
+
+    [ClientRpc]
+    private void ChangeStateClientRpc()
+    {
+        state = ChangeState(state, true);
     }
 
     private void InitVariables()
@@ -73,7 +115,7 @@ public class GameManager : NetworkBehaviour
 
     private void OnLastCardPlayedValueChanged(int prevVal, int newVal)
     {
-        UIManager.Instance.ChangeTextForPlayerValue((Values) newVal);
+        UIManager.Instance.ChangeTextForPlayerValue((Values)newVal);
         SpriteHolder.sh.cardsValue = newVal;
     }
 
@@ -91,7 +133,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     public void InitDeckClientRpc()
     {
-        colorsAvaliable.ForEach(col => valuesAvaliable.ForEach( val => networkDeck.Add(new NetworkCard((int)col,(int)val))));
+        colorsAvaliable.ForEach(col => valuesAvaliable.ForEach(val => networkDeck.Add(new NetworkCard((int)col, (int)val))));
     }
 
     // starts the shuffling process
@@ -124,7 +166,7 @@ public class GameManager : NetworkBehaviour
     //----------------------- Handling player order ------------------------
 
 
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc(RequireOwnership = false)]
     public void SetFirstPlayerServerRpc()
     {
         Debug.Log("SetFirstPlayerServerRpc");
@@ -141,9 +183,9 @@ public class GameManager : NetworkBehaviour
             currentPlayerId.Value = placements[placements.Count];
             currenPlayerIndex = playerIds.FindIndex(id => id == currentPlayerId.Value);
             Debug.LogWarning("############## index of currentplayer is " + currenPlayerIndex);
-            playerIds.ForEach( item => Debug.Log("##############" + item + "##############"));
+            playerIds.ForEach(item => Debug.Log("##############" + item + "##############"));
         }
-        
+
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -171,7 +213,7 @@ public class GameManager : NetworkBehaviour
     private void ResetCardsInMiddle()
     {
         if (SpriteHolder.sh.cardGos.Count <= 0) return;
-        
+
         if (SpriteHolder.sh.cardGos[0].GetComponent<Card>().ownerId == currentPlayerId.Value)
         {
             SpriteHolder.sh.ResetCardsInMiddleClientRpc();
@@ -194,7 +236,7 @@ public class GameManager : NetworkBehaviour
 
     //----------------------- Game/Round End  ------------------------
 
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc(RequireOwnership = false)]
     public void HandleCardsToSpwawnServerRpc(NetworkColors cols)
     {
         SpriteHolder.sh.ResetCardsInMiddleClientRpc();
@@ -209,12 +251,13 @@ public class GameManager : NetworkBehaviour
 
         foreach (KeyValuePair<int, ulong> placement in placements)
         {
-            
-          UpdatePlacementClientRpc(placement.Key, placement.Value);
-            
+
+            UpdatePlacementClientRpc(placement.Key, placement.Value);
+
         }
-        
-        
+
+        //state = ChangeState(state, true);
+        ChangeStateServerRpc();
         EndRoundClientRpc();
         PrepareNextGameServerRpc();
     }
@@ -243,6 +286,7 @@ public class GameManager : NetworkBehaviour
         };
     }
 
+
     [ServerRpc]
     public void PrepareNextGameServerRpc()
     {
@@ -252,6 +296,8 @@ public class GameManager : NetworkBehaviour
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
+        //state = ChangeState(state, true);
+        ChangeStateServerRpc();
         GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
         
     }
@@ -319,12 +365,12 @@ public class GameManager : NetworkBehaviour
         targetId_ = placements[1];
         senderId_ = placements[placements.Count];
 
-        int valOne_ = 0;
-        int valTwo_ = 0;
+        int valOne_ = -1;
+        int valTwo_ = -1;
 
         if (cardsExchanged.Value == 0)
         {
-            return;
+            //return; TODO take care of this case
         }
         if (cardsExchanged.Value == 1)
         {
@@ -335,12 +381,6 @@ public class GameManager : NetworkBehaviour
             valTwo_ = (int)_vals[1];
         }
 
-
-        //NetworkCard newValOne_ = new NetworkCard();
-        //NetworkCard newValTwo_ = new NetworkCard();
-
-        //newValOne_ = GetPlayerById(senderId_).networkHand.Find(c => c.value == valOne_);
-        //newValTwo_ = GetPlayerById(senderId_).networkHand.Find(c => c.value == valTwo_);
 
         Debug.Log("Target ID: " + targetId_);
 
@@ -453,6 +493,25 @@ public class GameManager : NetworkBehaviour
             return 1;
         }
         else return 0;
+    }
+
+    public Player GetLocalPlayer()
+    {
+        return localPlayer;
+    }
+
+    internal void SetLocalPlayer(Player _player)
+    {
+        localPlayer = _player;
+    }
+
+    public void PreGame()
+    {
+        //SetSprite methode callen
+        cardsExchanged.Value = -1;
+        ResetPlacementsServerRpc();
+        ExChangeCards.Instance.Deactivate();
+        ChangeStateServerRpc();
     }
 }
 

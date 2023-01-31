@@ -20,7 +20,7 @@ public class CardUI : MonoBehaviour, IPointerDownHandler
         else
             cardsToSwap_ = GameManager.gM.cardsExchanged.Value;
         //int num_ =GameManager.gM.GetWishesAmount();
-        if (ExChangeCards.Instance.selectedCards.Count >= cardsToSwap_) return;
+        if (ExChangeCards.Instance.cardsToSteal.Count >= cardsToSwap_) return;
         RectTransform trans_ = gameObject.GetComponent<RectTransform>();
         orginalPos = trans_.anchoredPosition;
         trans_.anchoredPosition = orginalPos + Vector2.up * 30;

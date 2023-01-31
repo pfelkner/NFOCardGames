@@ -1464,14 +1464,13 @@ RectTransform:
   - {fileID: 1997637276}
   - {fileID: 580913107}
   - {fileID: 419592846}
-  - {fileID: 1056466556}
-  - {fileID: 1855033635}
+  - {fileID: 680007781}
   m_Father: {fileID: 225437509}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -12, y: 31}
+  m_AnchoredPosition: {x: -600, y: -600}
   m_SizeDelta: {x: 129.6595, y: 40.3148}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &519583565
@@ -1528,9 +1527,8 @@ MonoBehaviour:
   valuesToRemove: 
   addBtn: {fileID: 1997637275}
   removeBtn: {fileID: 580913106}
-  selectedCards: []
+  cardsToSteal: []
   text: {fileID: 924066981}
-  counter: 0
 --- !u!1 &547772582
 GameObject:
   m_ObjectHideFlags: 0
@@ -1953,6 +1951,44 @@ RectTransform:
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -278.19998, y: -17.400017}
   m_SizeDelta: {x: 200, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &680007780
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 680007781}
+  m_Layer: 5
+  m_Name: CardHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &680007781
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680007780}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1855033635}
+  - {fileID: 1056466556}
+  m_Father: {fileID: 519583564}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &697778626
 GameObject:
@@ -2922,6 +2958,7 @@ MonoBehaviour:
   frameColorTurn: {r: 0.73333335, g: 0.6901961, b: 0.14509805, a: 1}
   frameColorNoTurn: {r: 0.23137255, g: 0.23137255, b: 0.41568628, a: 1}
   exchangerGo: {fileID: 519583563}
+  cardsHolder: {fileID: 680007780}
 --- !u!4 &894057386
 Transform:
   m_ObjectHideFlags: 0
@@ -3537,7 +3574,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1056466555}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3550,8 +3587,8 @@ RectTransform:
   - {fileID: 955185784}
   - {fileID: 2070073226}
   - {fileID: 288708664}
-  m_Father: {fileID: 519583564}
-  m_RootOrder: 4
+  m_Father: {fileID: 680007781}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -6501,7 +6538,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1855033634}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6514,8 +6551,8 @@ RectTransform:
   - {fileID: 1297985667}
   - {fileID: 720006943}
   - {fileID: 1067580961}
-  m_Father: {fileID: 519583564}
-  m_RootOrder: 5
+  m_Father: {fileID: 680007781}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

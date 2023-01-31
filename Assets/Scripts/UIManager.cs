@@ -28,6 +28,8 @@ public class UIManager : MonoBehaviour
     [Header("ExchangerObject")]
     public GameObject exchangerGo;
 
+    public GameObject cardsHolder;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -70,14 +72,22 @@ public class UIManager : MonoBehaviour
             frameImage.color = frameColorNoTurn;
         }
     }
-    public void TurnOnExchanger()
+    public void StealMode()
     {
         exchangerGo.SetActive(true);
+        cardsHolder.SetActive(true);
     }
-    public void TurnOffExchanger()
+
+    public void ReturnMode()
+    {
+        //exchangerGo.SetActive(true);
+        cardsHolder.SetActive(false);
+    }
+
+    public void ResetSelection()
     {
         ExChangeCards.Instance.ResetSelection();
-        exchangerGo.SetActive(false);
+        //exchangerGo.SetActive(false);
     }
 
 
