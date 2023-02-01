@@ -179,8 +179,14 @@ public class Player : NetworkBehaviour
             cardsInHand.ForEach(c => c.gameObject.SetActive(false));
             cardsInHand.Clear();
             SpawnCardsClientRpc();
-                //Debug.Log($"Found the following  cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
-             
+            Debug.LogWarning("*********"+cardsInHand.Count + " : " + networkHand.Count);
+            if (networkHand.Count == (networkHand.Count - mylist.Count));
+            {
+                GameManager.gM.ChangeStateServerRpc();
+                UIManager.Instance.ReturnMode();
+            }
+            //Debug.Log($"Found the following  cards to remove: {newValOne_.ToString()} & {newValTwo_.ToString()}");
+
         }
 
         //if (!cardOne && !cardTwo) HandleStolenCardsServerRpc();
@@ -239,10 +245,13 @@ public class Player : NetworkBehaviour
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
         GameManager.gM.cardsExchanged.Value = count;
         //UIManager.Instance.ResetSelection();
-        if (cardsInHand.Count == 5)
+        Debug.Log("Network cards in Hand " + networkHand.Count);
+        Debug.Log("### network cards in hand " + networkHand.Count);
+        Debug.Log("### cards in hand " + cardsInHand.Count + " : " + count);
+        if (networkHand.Count == 5)
         {
-            GameManager.gM.ChangeStateServerRpc();
-            UIManager.Instance.ReturnMode();
+            //GameManager.gM.ChangeStateServerRpc();
+            //UIManager.Instance.ReturnMode();
         }
     }
 
