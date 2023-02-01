@@ -77,6 +77,7 @@ public class ExChangeCards : MonoBehaviour
 
     public void StealCards()
     {
+        if (cardsToSteal.Count > 2) return;
         List<Values> vals_ = new List<Values>();
         cardsToSteal.ForEach(c => vals_.Add(c.value));
         GameManager.gM.GetCards(vals_);

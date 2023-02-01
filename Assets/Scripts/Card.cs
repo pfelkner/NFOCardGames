@@ -19,7 +19,6 @@ public class Card : MonoBehaviour
     public SpriteRenderer cardRenderer;
 
 
-
     private Vector2 oGPos;
     private bool isSelected;
 

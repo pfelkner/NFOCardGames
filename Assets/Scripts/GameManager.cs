@@ -128,12 +128,21 @@ public class GameManager : NetworkBehaviour
 
     //----------------------- Set Up ------------------------
 
+    public void StartGame()
+    {
+        playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
+        InitDeckClientRpc();
+        InitShuffleServerRpc();
+        localPlayer.DealCards();
+        SetFirstPlayerServerRpc();
+        ChangeStateServerRpc();
+    }
 
     // All possible cards in a deck get created
     [ClientRpc]
     public void InitDeckClientRpc()
     {
-        colorsAvaliable.ForEach(col => valuesAvaliable.ForEach(val => networkDeck.Add(new NetworkCard((int)col, (int)val))));
+        networkDeck = Util.GetNetworkDeck();
     }
 
     // starts the shuffling process
@@ -273,11 +282,6 @@ public class GameManager : NetworkBehaviour
         SpriteHolder.sh.ResetCardsInMiddleClientRpc();
     }
 
-    public void SetPlayerCount()
-    {
-        playerCount = players.Count;
-    }
-
     public ClientRpcParams TargetId(ulong id)
     {
         return new ClientRpcParams
@@ -296,7 +300,6 @@ public class GameManager : NetworkBehaviour
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
-        //state = ChangeState(state, true);
         ChangeStateServerRpc();
         GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
         
@@ -311,6 +314,8 @@ public class GameManager : NetworkBehaviour
 
     public void GetCards(List<Values> _vals)
     {
+        int available = GetWishesAmount();
+        if (available == 0) return;
         // erste mal is true, der pr�si will karten , das zweite mal false , der pr�si gibt karten
         // der unterschied ist nur dass die empf�nger sender getauscht werden
         ulong targetId_;
@@ -323,25 +328,17 @@ public class GameManager : NetworkBehaviour
         int valOne_ = -1;
         int valTwo_ = -1;
 
-        if (GetWishesAmount() == 2)
-        {
+        if (_vals.Count > 0)
             valOne_ = (int)_vals[0];
+
+        if (available == 2 && _vals.Count == 2)
             valTwo_ = (int)_vals[1];
-            
-        } else if (GetWishesAmount() == 1)
-        {
-            valOne_ = (int)_vals[0];
-        }
-        
 
 
         Debug.Log("Target ID: " + targetId_);
 
         RequestCardsServerRpc(valOne_, valTwo_, senderId_, targetId_);
 
-        // finde arsch
-        // values entpacken
-        // arsch karten entnehmen 
     }
 
     [ServerRpc(RequireOwnership = false)]
