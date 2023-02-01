@@ -49,7 +49,7 @@ public class GameManager : NetworkBehaviour
     {
         InitHandlers();
         InitVariables();
-        state = Transition(State.PreGame, true);
+        state = Transition(State.PreGame);
     }
 
     public override void OnNetworkDespawn()
@@ -59,14 +59,16 @@ public class GameManager : NetworkBehaviour
         rnd.OnValueChanged -= ShuffleWithRandomClientRpc;
     }
 
-    public State ChangeState(State _state, bool _isDone) =>
+    public State ChangeState(State _state) =>
        state switch
        {
-           State.PreGame => Transition(State.Playing, _isDone),
-           State.Playing => Transition(State.PostGame, _isDone),
-           State.PostGame => Transition(State.Stealing, _isDone),
-           State.Stealing => Transition(State.Returning, _isDone),
-           State.Returning => Transition(State.PreGame, _isDone),// just in case of false bool state gets reset to stealing
+           State.PreGame => Transition(State.Playing),
+           State.Playing => Transition(State.PostGame),
+           State.PostGame => Transition(State.Stealing),
+           State.Stealing => Transition(State.Returning),
+           State.Returning => Transition(State.StealingVize),
+           State.StealingVize => Transition(State.ReturningVize),
+           State.ReturningVize => Transition(State.PreGame),
            _ => throw new ArgumentException("Invalid enum value for state", nameof(state)),
        };
 
@@ -77,25 +79,33 @@ public class GameManager : NetworkBehaviour
     // returning -> pregame
     //           -> stealing
 
-    public State Transition(State _newState, bool _isDone)
+    public State Transition(State _newState)
     {
-        Debug.Log($"New state: {_newState}");
-        if (!_isDone)
-            return State.Stealing;
+        if (placements.Count != 4 && (_newState == State.StealingVize || _newState == State.ReturningVize))
+        {
+            return State.PreGame;
+        } 
+        if(state == State.StealingVize)
+        {
+
+        }
         return _newState;
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void ChangeStateServerRpc(bool _flag)
+    public void ChangeStateServerRpc()
     {
-        //state = ChangeState(state, true);
-        ChangeStateClientRpc(_flag);
+        ChangeStateClientRpc();
+        if (state == State.StealingVize)
+        {
+            GetPlayerById(placements[2]).ExchangeCardsClientRpc(TargetId(placements[2]));
+        }
     }
 
     [ClientRpc]
-    private void ChangeStateClientRpc(bool _flag)
+    private void ChangeStateClientRpc()
     {
-        state = ChangeState(state, _flag);
+        state = ChangeState(state);
     }
 
     private void InitVariables()
@@ -150,7 +160,7 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     private void ShuffleWithRandomClientRpc(int previousValue, int newValue)
     {
-        Debug.LogWarning("ShuffleWithRandomClientRpc");
+        
         NetworkCard temp = networkDeck[newValue];
         networkDeck[newValue] = networkDeck[0];
         networkDeck[0] = temp;
@@ -169,21 +179,17 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SetFirstPlayerServerRpc()
     {
-        Debug.Log("SetFirstPlayerServerRpc");
+       
         NetworkClient currentPlayerNetworkClient;
         if (placements.Count == 0)
         {
-            Debug.Log($"This condition is only met in the first round");
             currentPlayerNetworkClient = NetworkManager.Singleton.ConnectedClientsList[0];
             currentPlayerId.Value = currentPlayerNetworkClient.ClientId;
         }
         else
         {
-            Debug.Log($"Placements count {placements.Count}");
             currentPlayerId.Value = placements[placements.Count];
             currenPlayerIndex = playerIds.FindIndex(id => id == currentPlayerId.Value);
-            Debug.LogWarning("############## index of currentplayer is " + currenPlayerIndex);
-            playerIds.ForEach(item => Debug.Log("##############" + item + "##############"));
         }
 
     }
@@ -209,7 +215,6 @@ public class GameManager : NetworkBehaviour
         return currenPlayerIndex;
     }
 
-    //
     private void ResetCardsInMiddle()
     {
         if (SpriteHolder.sh.cardGos.Count <= 0) return;
@@ -251,13 +256,11 @@ public class GameManager : NetworkBehaviour
 
         foreach (KeyValuePair<int, ulong> placement in placements)
         {
-
             UpdatePlacementClientRpc(placement.Key, placement.Value);
-
         }
 
         //state = ChangeState(state, true);
-        ChangeStateServerRpc(true);
+        ChangeStateServerRpc();
         EndRoundClientRpc();
         PrepareNextGameServerRpc();
     }
@@ -290,16 +293,21 @@ public class GameManager : NetworkBehaviour
     [ServerRpc]
     public void PrepareNextGameServerRpc()
     {
-        Debug.Log($"PrepareNextGameServerRpc on {NetworkManager.Singleton.LocalClientId}; Amount of clients: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
         playerIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
         ResetLastPlayed();
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
         //state = ChangeState(state, true);
-        ChangeStateServerRpc(true);
-        GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
-        
+        ChangeStateServerRpc();
+
+        if (state == State.Stealing)
+        {
+            GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
+        }
+     
+
+
     }
 
     private void ResetLastPlayed()
@@ -314,12 +322,21 @@ public class GameManager : NetworkBehaviour
         int wishesAmount = GetWishesAmount();
         // erste mal is true, der pr�si will karten , das zweite mal false , der pr�si gibt karten
         // der unterschied ist nur dass die empf�nger sender getauscht werden
-        ulong targetId_;
+        ulong  targetId_;
         ulong senderId_;
 
-        targetId_ = GetPlayerPlacement() == 1 ? placements[placements.Count] : placements[placements.Count - 1];
+        if (state == State.Stealing)
+        {
+            targetId_ = placements[placements.Count];
+            senderId_ = placements[1];
 
-        senderId_ = GetPlayerPlacement() == 1 ? placements[1] : placements[2];
+        }
+        else if (state == State.StealingVize)
+        {
+            targetId_ = placements[placements.Count - 1];
+            senderId_ = placements[2];
+        }
+        else throw new Exception("GetCard is called from illegal state");
 
         int valOne_ = -1;
         int valTwo_ = -1;
@@ -329,10 +346,6 @@ public class GameManager : NetworkBehaviour
 
         if (_vals.Count == 2 && wishesAmount == 2)
             valTwo_ = (int)_vals[1];
-        
-
-
-        Debug.Log("Target ID: " + targetId_);
 
         RequestCardsServerRpc(valOne_, valTwo_, senderId_, targetId_);
     }
@@ -350,12 +363,16 @@ public class GameManager : NetworkBehaviour
         ulong targetId_;
         ulong senderId_;
 
-        targetId_ = GetPlayerPlacement() == 1 ? placements[1] : placements[2];
-        senderId_ = GetPlayerPlacement() == 1 ? placements[placements.Count] : placements[placements.Count - 1];
-        //if (GetPlayerPlacement() == placements.Count)
-        //    senderId_ = placements[placements.Count];
-        //else
-        //    senderId_ = placements[placements.Count - 1];
+        if (state == State.Returning)
+        {
+            targetId_ = placements[1];
+            senderId_ = placements[placements.Count];
+        } else if( state == State.ReturningVize)
+        {
+            targetId_ = placements[2];
+            senderId_ = placements[placements.Count - 1];
+        } else
+            throw new Exception("Return cards frome illegal state");
 
         int valOne_ = -1;
         int valTwo_ = -1;
@@ -372,15 +389,7 @@ public class GameManager : NetworkBehaviour
             valOne_ = (int)_vals[0];
             valTwo_ = (int)_vals[1];
         }
-
-
-        Debug.Log("Target ID: " + targetId_);
-
         ReturnCardsServerRpc(valOne_, valTwo_, senderId_, targetId_);
-
-        // finde arsch
-        // values entpacken
-        // arsch karten entnehmen 
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -437,7 +446,6 @@ public class GameManager : NetworkBehaviour
     internal void RemovePlayerIdServerRpc(ulong _id)
     {
         playerIds.Remove(_id);
-        Debug.LogWarning($"RemovePlayerServerRpc: count after remove = {NetworkManager.Singleton.ConnectedClientsIds.Count}");
     }
 
     public void HandlePlayerDone()
@@ -501,9 +509,7 @@ public class GameManager : NetworkBehaviour
     {
         //SetSprite methode callen
         cardsExchanged.Value = -1;
-        ResetPlacementsServerRpc();
-        ExChangeCards.Instance.Deactivate();
-        ChangeStateServerRpc(true);
+        ChangeStateServerRpc();
     }
 }
 

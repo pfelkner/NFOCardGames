@@ -24,26 +24,24 @@ public class ExChangeCards : MonoBehaviour
 
     public void Update()
     {
-        if (GameManager.gM.state == State.Stealing || GameManager.gM.state == State.Returning)
+        if (GameManager.gM.state == State.Stealing || GameManager.gM.state == State.Returning || GameManager.gM.state == State.StealingVize || GameManager.gM.state == State.ReturningVize)
         {
             RectTransform trans_ = gameObject.GetComponent<RectTransform>();
             trans_.anchoredPosition = new Vector2(-12, 31);
-            Debug.Log($"Current State {GameManager.gM.state}");
         } else
         {
             RectTransform trans_ = gameObject.GetComponent<RectTransform>();
             trans_.anchoredPosition = new Vector2(-600, -600);
-            Debug.Log($"ELSE Current State {GameManager.gM.state}");
         }
 
     }
 
 
-    public void SetButtons(bool _flag)
-    {
-        addBtn.SetActive(_flag);
-        removeBtn.SetActive(_flag);
-    }
+    //public void SetButtons(bool _flag)
+    //{
+    //    addBtn.SetActive(_flag);
+    //    removeBtn.SetActive(_flag);
+    //}
 
 
     public void AddToSelected(CardUI _cardUI)
@@ -55,13 +53,14 @@ public class ExChangeCards : MonoBehaviour
         cardsToSteal.Remove(_cardUI);
     }
 
+    // btn click
     public void SentCards()
     {
        // cardsToSteal.ForEach(c => c.Deselect());
-        if (GameManager.gM.state == State.Stealing)
+        if (GameManager.gM.state == State.Stealing || GameManager.gM.state == State.StealingVize)
         {
             StealCards();
-        } else if (GameManager.gM.state == State.Returning)
+        } else if (GameManager.gM.state == State.Returning || GameManager.gM.state == State.ReturningVize)
         {
             ReturnCards();
         }

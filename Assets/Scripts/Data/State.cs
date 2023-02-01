@@ -5,5 +5,7 @@ public enum State
     Playing,
     PostGame,
     Stealing,
-    Returning
+    Returning,
+    StealingVize,
+    ReturningVize
 }

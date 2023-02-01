@@ -51,7 +51,6 @@ public class UIManager : MonoBehaviour
     public void ChangeTextForPlayerValue(Values val)
     {
         cardTOBeatText.text = " of " + val.ToString();
-       
     }
     public void ChangeTextForPlayerInt( int amount)
     {

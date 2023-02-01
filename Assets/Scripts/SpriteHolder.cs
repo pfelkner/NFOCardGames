@@ -38,7 +38,6 @@ public class SpriteHolder : NetworkBehaviour
         float padding = 0;
         float offSet = 0;
         
-            Debug.Log($"{player.name} is local: {player.IsLocalPlayer}");
             if (player.IsLocalPlayer)
             {
 
@@ -70,7 +69,6 @@ public class SpriteHolder : NetworkBehaviour
     public void SetCardInMiddleClientRpc(int amount, int value, NetworkColors col)
     {
         //Debug.LogWarning($"Inside set in middle {GameManager.gM.lastCardPlayedAmount.Value};");
-        Debug.LogWarning($"###### {ParseNetworkCols(col).Count} : {amount}########");
         List<Colors> newColors = ParseNetworkCols(col);
         for (int i = 0; i < amount; i++)
         {   
@@ -86,7 +84,6 @@ public class SpriteHolder : NetworkBehaviour
             card.color = newColors[i];
 
             card.ownerId = GameManager.gM.currentPlayerId.Value;
-            Debug.LogWarning($"cast{(Values)cardsValue} :{cardsValue}");
             card.value = (Values)value;
             cardGos.Add(go);
         }
