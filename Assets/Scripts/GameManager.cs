@@ -507,7 +507,7 @@ public class GameManager : NetworkBehaviour
 
     public void PreGame()
     {
-        //SetSprite methode callen
+        ResetPlacementsServerRpc();
         cardsExchanged.Value = -1;
         ChangeStateServerRpc();
     }

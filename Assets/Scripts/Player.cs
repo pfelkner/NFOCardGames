@@ -224,11 +224,12 @@ public class Player : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void HandleReturnCardsServerRpc(NetworkCard _newCardOne, NetworkCard _newCardTwo, ulong _senderId)
     {
+        Debug.Log("HandleReturncArdsServer2" + GameManager.gM.state);
         GameManager.gM.cardsExchanged.Value = 2;
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
 
         GameManager.gM.ChangeStateServerRpc();
-        if (GameManager.gM.state == State.ReturningVize)
+        if (GameManager.gM.state == State.PreGame)
         {
             GameManager.gM.PreGame();
         }
@@ -236,11 +237,12 @@ public class Player : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void HandleReturnCardsServerRpc(NetworkCard _newCardOne, ulong _senderId)
     {
+        Debug.Log("HandleReturncArdsServer1" + GameManager.gM.state);
         GameManager.gM.cardsExchanged.Value = 1;
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
 
         GameManager.gM.ChangeStateServerRpc();
-        if (GameManager.gM.state == State.ReturningVize)
+        if (GameManager.gM.state == State.PreGame)
         {
             GameManager.gM.PreGame();
         }
