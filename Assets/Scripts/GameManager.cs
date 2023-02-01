@@ -311,6 +311,7 @@ public class GameManager : NetworkBehaviour
 
     public void GetCards(List<Values> _vals)
     {
+        int wishesAmount = GetWishesAmount();
         // erste mal is true, der pr�si will karten , das zweite mal false , der pr�si gibt karten
         // der unterschied ist nur dass die empf�nger sender getauscht werden
         ulong targetId_;
@@ -323,25 +324,17 @@ public class GameManager : NetworkBehaviour
         int valOne_ = -1;
         int valTwo_ = -1;
 
-        if (GetWishesAmount() == 2)
-        {
+        if (_vals.Count > 0)
             valOne_ = (int)_vals[0];
+
+        if (_vals.Count == 2 && wishesAmount == 2)
             valTwo_ = (int)_vals[1];
-            
-        } else if (GetWishesAmount() == 1)
-        {
-            valOne_ = (int)_vals[0];
-        }
         
 
 
         Debug.Log("Target ID: " + targetId_);
 
         RequestCardsServerRpc(valOne_, valTwo_, senderId_, targetId_);
-
-        // finde arsch
-        // values entpacken
-        // arsch karten entnehmen 
     }
 
     [ServerRpc(RequireOwnership = false)]
