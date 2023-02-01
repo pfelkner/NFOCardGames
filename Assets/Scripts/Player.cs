@@ -41,7 +41,7 @@ public class Player : NetworkBehaviour
             DealCards();
             GameManager.gM.SetFirstPlayerServerRpc();
             //GameManager.gM.state = GameManager.gM.ChangeState(GameManager.gM.state, true);
-            GameManager.gM.ChangeStateServerRpc();
+            GameManager.gM.ChangeStateServerRpc(true);
 
         }
         if (Input.GetKeyDown(KeyCode.U) && IsOwner)
@@ -196,8 +196,11 @@ public class Player : NetworkBehaviour
     {
         GameManager.gM.cardsExchanged.Value = 0;
         UIManager.Instance.ResetSelection();
-        GameManager.gM.ChangeStateServerRpc();
+        GameManager.gM.ChangeStateServerRpc(true);
+        GameManager.gM.ChangeStateServerRpc(true);
         UIManager.Instance.ReturnMode();
+        UIManager.Instance.ResetSelection();
+        GameManager.gM.PreGame();
     }
 
     [ServerRpc(RequireOwnership =false)]
@@ -206,7 +209,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 2;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
-        GameManager.gM.ChangeStateServerRpc();
+        GameManager.gM.ChangeStateServerRpc(true);
         UIManager.Instance.ReturnMode();
 
     }
@@ -216,7 +219,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 1;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
-        GameManager.gM.ChangeStateServerRpc();
+        GameManager.gM.ChangeStateServerRpc(true);
         UIManager.Instance.ReturnMode();
     }
 
@@ -226,9 +229,8 @@ public class Player : NetworkBehaviour
     {
         GameManager.gM.cardsExchanged.Value = 0;
         UIManager.Instance.ResetSelection();
-        GameManager.gM.ChangeStateServerRpc();
-        UIManager.Instance.ResetSelection();
-        GameManager.gM.PreGame();
+        Test();
+        //GameManager.gM.PreGame();
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -237,9 +239,10 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 2;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
-        GameManager.gM.ChangeStateServerRpc();
-        UIManager.Instance.ResetSelection();
-        GameManager.gM.PreGame();
+        Test();
+        //GameManager.gM.ChangeStateServerRpc(true);
+        //UIManager.Instance.ResetSelection();
+        //GameManager.gM.PreGame();
     }
     [ServerRpc(RequireOwnership = false)]
     public void HandleReturnCardsServerRpc(NetworkCard _newCardOne, ulong _senderId)
@@ -247,9 +250,27 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 1;
         Debug.Log("HandleStolenCardsServerRpc");
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
-        GameManager.gM.ChangeStateServerRpc();
+        Test();
+        //GameManager.gM.ChangeStateServerRpc(true);
+        //UIManager.Instance.ResetSelection();
+        //GameManager.gM.PreGame();
+    }
+
+    private void Test()
+    {
+        Dictionary<int, ulong> placements_ = GameManager.gM.GetPlacement();
         UIManager.Instance.ResetSelection();
-        GameManager.gM.PreGame();
+        if (placements_.Count == 4 && placements_[4] == NetworkManager.Singleton.LocalClientId)
+        {
+            // sets card to stealing n case we are the ass (vice presi still gets to steal cards from vice ass
+            GameManager.gM.ChangeStateServerRpc(false);
+            GetPlayerById(placements_[2]).ExchangeCardsClientRpc(GameManager.gM.TargetId(placements_[3]));
+            return;
+        } else
+        {
+            GameManager.gM.ChangeStateServerRpc(true);
+            GameManager.gM.PreGame();
+        }
     }
 
     [ClientRpc]
@@ -279,10 +300,11 @@ public class Player : NetworkBehaviour
         if (!IsOwner) return;
 
         // in case presi didn't get any cards, leave returning state and move on
+        // TODO maybe remove to properly handle states
         if (GameManager.gM.cardsExchanged.Value == 0)
         {
             UIManager.Instance.ResetSelection();
-            GameManager.gM.ChangeStateServerRpc();
+            GameManager.gM.ChangeStateServerRpc(true);
             GameManager.gM.PreGame();
         }
         bool cardOne = false, cardTwo = false;

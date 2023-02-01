@@ -86,16 +86,16 @@ public class GameManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void ChangeStateServerRpc()
+    public void ChangeStateServerRpc(bool _flag)
     {
         //state = ChangeState(state, true);
-        ChangeStateClientRpc();
+        ChangeStateClientRpc(_flag);
     }
 
     [ClientRpc]
-    private void ChangeStateClientRpc()
+    private void ChangeStateClientRpc(bool _flag)
     {
-        state = ChangeState(state, true);
+        state = ChangeState(state, _flag);
     }
 
     private void InitVariables()
@@ -257,7 +257,7 @@ public class GameManager : NetworkBehaviour
         }
 
         //state = ChangeState(state, true);
-        ChangeStateServerRpc();
+        ChangeStateServerRpc(true);
         EndRoundClientRpc();
         PrepareNextGameServerRpc();
     }
@@ -297,7 +297,7 @@ public class GameManager : NetworkBehaviour
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
         //state = ChangeState(state, true);
-        ChangeStateServerRpc();
+        ChangeStateServerRpc(true);
         GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
         
     }
@@ -317,9 +317,9 @@ public class GameManager : NetworkBehaviour
         ulong targetId_;
         ulong senderId_;
 
-        targetId_ = placements[placements.Count];
+        targetId_ = GetPlayerPlacement() == 1 ? placements[placements.Count] : placements[placements.Count - 1];
 
-        senderId_ = placements[1];
+        senderId_ = GetPlayerPlacement() == 1 ? placements[1] : placements[2];
 
         int valOne_ = -1;
         int valTwo_ = -1;
@@ -343,11 +343,6 @@ public class GameManager : NetworkBehaviour
         GetPlayerById(_targetId).StealCardsClientRpc(_valOne, _valTwo, _senderId, TargetId(_targetId));
     }
 
- 
-
-
-
-
 
 
     public void ReturnCards(List<Values> _vals)
@@ -355,8 +350,12 @@ public class GameManager : NetworkBehaviour
         ulong targetId_;
         ulong senderId_;
 
-        targetId_ = placements[1];
-        senderId_ = placements[placements.Count];
+        targetId_ = GetPlayerPlacement() == 1 ? placements[1] : placements[2];
+        senderId_ = GetPlayerPlacement() == 1 ? placements[placements.Count] : placements[placements.Count - 1];
+        //if (GetPlayerPlacement() == placements.Count)
+        //    senderId_ = placements[placements.Count];
+        //else
+        //    senderId_ = placements[placements.Count - 1];
 
         int valOne_ = -1;
         int valTwo_ = -1;
@@ -504,7 +503,7 @@ public class GameManager : NetworkBehaviour
         cardsExchanged.Value = -1;
         ResetPlacementsServerRpc();
         ExChangeCards.Instance.Deactivate();
-        ChangeStateServerRpc();
+        ChangeStateServerRpc(true);
     }
 }
 
