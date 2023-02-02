@@ -11,7 +11,14 @@ using UnityEngine;
 
 public class Relay : MonoBehaviour
 {
+    public static Relay Instance;
     public string code;
+
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+    }
 
     private async void Start()
     {
@@ -45,17 +52,17 @@ public class Relay : MonoBehaviour
         }
     }
 
-    public async void JoinRelay()
+    public async void JoinRelay(string _code)
     {
         try
         {
-            JoinAllocation joinAlloc = await RelayService.Instance.JoinAllocationAsync(code);
+            JoinAllocation joinAlloc = await RelayService.Instance.JoinAllocationAsync(_code);
             RelayServerData relayServerData = new RelayServerData(joinAlloc, "dtls");
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
             NetworkManager.Singleton.StartClient();
-            UIManager.Instance.ClickClient();
-            Debug.Log("Joined Relay " + code);
+            //UIManager.Instance.ClickClient();
+            Debug.Log("Joined Relay " + _code);
 
         } catch(RelayServiceException e)
         {

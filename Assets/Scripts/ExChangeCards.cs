@@ -49,6 +49,18 @@ public class ExChangeCards : MonoBehaviour
     //    removeBtn.SetActive(_flag);
     //}
 
+    public void SetPosition()
+    {
+        RectTransform trans_ = gameObject.GetComponent<RectTransform>();
+        trans_.anchoredPosition = new Vector2(-12, 31);
+    }
+
+    public void SetPosition2()
+    {
+        RectTransform trans_ = gameObject.GetComponent<RectTransform>();
+        trans_.anchoredPosition = new Vector2(600, 600);
+    }
+
 
     public void AddToSelected(CardUI _cardUI)
     {

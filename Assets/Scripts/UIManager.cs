@@ -1,3 +1,4 @@
+using System.Globalization;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -26,10 +27,21 @@ public class UIManager : MonoBehaviour
 
     public GameObject cardsHolder;
 
+    public GameObject joinCodeInput;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) && joinCodeInput)
+        {
+            submitInputCode();
+        }
+    }
+
     public void ClickHost()
     {
         //NetworkManager.Singleton.StartHost();
@@ -42,6 +54,18 @@ public class UIManager : MonoBehaviour
         //NetworkManager.Singleton.StartClient();
         btnPanel.SetActive(false);
         hostClientText.text = "Client";
+        joinCodeInput.SetActive(true);
+    }
+
+    public void submitInputCode()
+    {
+        string code;
+        code = joinCodeInput.GetComponent<TMP_InputField>().text;
+        if (code != "")
+        {
+            Relay.Instance.JoinRelay(code);
+            joinCodeInput.SetActive(false);
+        }
     }
 
     public void SetIsCurrentPlayerText(bool _flag)

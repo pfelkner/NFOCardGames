@@ -69,7 +69,13 @@ public class Player : NetworkBehaviour
         }
 
         if (!IsExchanging())
+        {
             ExChangeCards.Instance.gameObject.SetActive(false);
+            ExChangeCards.Instance.SetPosition2();
+        } else
+        {
+            ExChangeCards.Instance.SetPosition();
+        }
 
     }
 
