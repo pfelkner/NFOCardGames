@@ -1403,7 +1403,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &519583564
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3059,8 +3059,6 @@ MonoBehaviour:
   hostClientText: {fileID: 115166020}
   playerTxt: {fileID: 1338346167}
   btnPanel: {fileID: 581227867}
-  cardTOBeatText: {fileID: 0}
-  amountToBeat: {fileID: 0}
   isCurrentPlayerText: {fileID: 770633353}
   frameImage: {fileID: 1207401118}
   frameColorTurn: {r: 0.73333335, g: 0.6901961, b: 0.14509805, a: 1}
