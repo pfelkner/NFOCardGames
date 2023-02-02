@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Netcode;
 using UnityEngine;
-using static UnityEditor.Progress;
 using Random = UnityEngine.Random;
 
 public class GameManager : NetworkBehaviour
@@ -404,7 +403,7 @@ public class GameManager : NetworkBehaviour
     
     //Utils
 
-    public Dictionary<int,ulong> GetPlacement()
+    public Dictionary<int,ulong> GetPlacements()
     {
         return placements;
     }

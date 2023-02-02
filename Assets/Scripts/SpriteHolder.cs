@@ -102,7 +102,7 @@ public class SpriteHolder : NetworkBehaviour
     [ClientRpc]
     public void SetWinLooseImageClientRpc()
     {
-        Dictionary<int,ulong> dict_ = GameManager.gM.GetPlacement();
+        Dictionary<int,ulong> dict_ = GameManager.gM.GetPlacements();
         winLooseImage.sprite = winLooseImageSprites[winnerCounter.Value];
         winnerCounter.Value++;
     }

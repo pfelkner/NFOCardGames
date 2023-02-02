@@ -24,11 +24,17 @@ public class ExChangeCards : MonoBehaviour
 
     public void Update()
     {
-        if (GameManager.gM.state == State.Stealing || GameManager.gM.state == State.Returning || GameManager.gM.state == State.StealingVize || GameManager.gM.state == State.ReturningVize)
+        if ((GameManager.gM.state == State.Stealing || GameManager.gM.state == State.Returning))
         {
             RectTransform trans_ = gameObject.GetComponent<RectTransform>();
             trans_.anchoredPosition = new Vector2(-12, 31);
-        } else
+        }
+        if (GameManager.gM.state == State.StealingVize || GameManager.gM.state == State.ReturningVize)
+        {
+            RectTransform trans_ = gameObject.GetComponent<RectTransform>();
+            trans_.anchoredPosition = new Vector2(-12, 31);
+        }
+        else
         {
             RectTransform trans_ = gameObject.GetComponent<RectTransform>();
             trans_.anchoredPosition = new Vector2(-600, -600);
