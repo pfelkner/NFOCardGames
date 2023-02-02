@@ -67,8 +67,19 @@ public class Player : NetworkBehaviour
         {
             GameManager.gM.ResetPlacementsServerRpc();
         }
+
+        if (!IsExchanging())
+            ExChangeCards.Instance.gameObject.SetActive(false);
+
     }
 
+    private bool IsExchanging()
+    {
+        return GameManager.gM.state == State.Stealing
+            || GameManager.gM.state == State.Returning
+            || GameManager.gM.state == State.StealingVize
+            || GameManager.gM.state == State.ReturningVize;
+    }
 
 
     [ClientRpc]

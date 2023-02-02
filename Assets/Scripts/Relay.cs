@@ -21,21 +21,20 @@ public class Relay : MonoBehaviour
         {
             Debug.Log("singned in" + AuthenticationService.Instance.PlayerId);
         };
-        AuthenticationService.Instance.SignInAnonymouslyAsync();
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
     }
 
     public async void CreateRelay()
     {
         try
         {
-   
-           Allocation alloc = await RelayService.Instance.CreateAllocationAsync(3);
-           code = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
-           RelayServerData relayServerData = new RelayServerData(alloc, "dtls");
-           NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+            Allocation alloc = await RelayService.Instance.CreateAllocationAsync(3);
+            code = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
+            RelayServerData relayServerData = new RelayServerData(alloc, "dtls");
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
-           NetworkManager.Singleton.StartHost();
-
+            NetworkManager.Singleton.StartHost();
+            UIManager.Instance.ClickHost();
             Debug.Log("Created Relay " + code);
 
 
@@ -50,12 +49,12 @@ public class Relay : MonoBehaviour
     {
         try
         {
-           JoinAllocation joinAlloc = await RelayService.Instance.JoinAllocationAsync(code);
-           RelayServerData relayServerData = new RelayServerData(joinAlloc, "dtls");
-           NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+            JoinAllocation joinAlloc = await RelayService.Instance.JoinAllocationAsync(code);
+            RelayServerData relayServerData = new RelayServerData(joinAlloc, "dtls");
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
-           NetworkManager.Singleton.StartClient();
-
+            NetworkManager.Singleton.StartClient();
+            UIManager.Instance.ClickClient();
             Debug.Log("Joined Relay " + code);
 
         } catch(RelayServiceException e)
@@ -64,7 +63,5 @@ public class Relay : MonoBehaviour
         }
         
     }
-
-
 
 }

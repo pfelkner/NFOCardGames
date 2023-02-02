@@ -124,13 +124,11 @@ public class GameManager : NetworkBehaviour
 
     private void OnLastCardPlayedValueChanged(int prevVal, int newVal)
     {
-        UIManager.Instance.ChangeTextForPlayerValue((Values)newVal);
         SpriteHolder.sh.cardsValue = newVal;
     }
 
     private void OnLastCardPlayedAmountChanged(int prevVal, int newVal)
     {
-        UIManager.Instance.ChangeTextForPlayerInt(newVal);
         SpriteHolder.sh.cardsAmount = newVal;
     }
 
@@ -297,7 +295,6 @@ public class GameManager : NetworkBehaviour
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
         SetFirstPlayerServerRpc();
-        //state = ChangeState(state, true);
         ChangeStateServerRpc();
 
         if (state == State.Stealing)

@@ -15,10 +15,6 @@ public class UIManager : MonoBehaviour
     [Header("Btn Panel")]
     public GameObject btnPanel;
 
-    [Header("Beat Text")]
-    public TextMeshProUGUI cardTOBeatText;
-    public TextMeshProUGUI amountToBeat;
-
     [Header("Turn Indicator")]
     public TextMeshProUGUI isCurrentPlayerText;
     public Image frameImage;
@@ -36,27 +32,17 @@ public class UIManager : MonoBehaviour
     }
     public void ClickHost()
     {
-        NetworkManager.Singleton.StartHost();
+        //NetworkManager.Singleton.StartHost();
         btnPanel.SetActive(false);
         hostClientText.text = "Host";
     }
 
     public void ClickClient()
     {
-        NetworkManager.Singleton.StartClient();
+        //NetworkManager.Singleton.StartClient();
         btnPanel.SetActive(false);
         hostClientText.text = "Client";
     }
-
-    public void ChangeTextForPlayerValue(Values val)
-    {
-        cardTOBeatText.text = " of " + val.ToString();
-    }
-    public void ChangeTextForPlayerInt( int amount)
-    {
-        amountToBeat.text = amount.ToString();
-    }
-
 
     public void SetIsCurrentPlayerText(bool _flag)
     {
