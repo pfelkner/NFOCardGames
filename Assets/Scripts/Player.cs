@@ -42,7 +42,7 @@ public class Player : NetworkBehaviour
             GameManager.gM.SetFirstPlayerServerRpc();
             //GameManager.gM.state = GameManager.gM.ChangeState(GameManager.gM.state, true);
             GameManager.gM.ChangeStateServerRpc();
-
+            UIManager.Instance.codePanel.SetActive(false);
         }
         if (Input.GetKeyDown(KeyCode.U) && IsOwner)
         {
