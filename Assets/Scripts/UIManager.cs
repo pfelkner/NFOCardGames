@@ -29,6 +29,9 @@ public class UIManager : MonoBehaviour
 
     public GameObject joinCodeInput;
 
+    public TextMeshProUGUI codeText;
+    public GameObject codePanel;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -38,13 +41,13 @@ public class UIManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return) && joinCodeInput)
         {
-            submitInputCode();
+            SubmitInputCode();
         }
     }
 
     public void ClickHost()
     {
-        //NetworkManager.Singleton.StartHost();
+        codePanel.SetActive(true);
         btnPanel.SetActive(false);
         hostClientText.text = "Host";
     }
@@ -57,7 +60,7 @@ public class UIManager : MonoBehaviour
         joinCodeInput.SetActive(true);
     }
 
-    public void submitInputCode()
+    public void SubmitInputCode()
     {
         string code;
         code = joinCodeInput.GetComponent<TMP_InputField>().text;
@@ -97,6 +100,11 @@ public class UIManager : MonoBehaviour
     {
         ExChangeCards.Instance.ResetSelection();
         //exchangerGo.SetActive(false);
+    }
+
+    public void SetCodeText(string _code)
+    {
+        codeText.text = _code;
     }
 
 

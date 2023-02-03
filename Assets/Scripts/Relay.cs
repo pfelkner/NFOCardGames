@@ -12,7 +12,7 @@ using UnityEngine;
 public class Relay : MonoBehaviour
 {
     public static Relay Instance;
-    public string code;
+    public string code_;
 
 
     private void Awake()
@@ -36,13 +36,14 @@ public class Relay : MonoBehaviour
         try
         {
             Allocation alloc = await RelayService.Instance.CreateAllocationAsync(3);
-            code = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
+            code_ = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
             RelayServerData relayServerData = new RelayServerData(alloc, "dtls");
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
             NetworkManager.Singleton.StartHost();
             UIManager.Instance.ClickHost();
-            Debug.Log("Created Relay " + code);
+            UIManager.Instance.SetCodeText(code_);
+            Debug.Log("Created Relay " + code_);
 
 
         }
