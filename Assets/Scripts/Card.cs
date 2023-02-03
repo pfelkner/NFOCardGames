@@ -32,7 +32,7 @@ public class Card : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (isPlayed || (GameManager.gM.GetLocalPlayer().IsCurrentPlayer() && GameManager.gM.state == State.Playing)) return;
+        if (isPlayed || (!GameManager.gM.GetLocalPlayer().IsCurrentPlayer() && GameManager.gM.state == State.Playing)) return;
 
         if (!isSelected && cardOwner.IsValidCard(this))
             SelectCard();
