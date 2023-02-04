@@ -547,7 +547,7 @@ public class GameManager : NetworkBehaviour
     {
         string cardText_ = string.Empty;
         cardText_ = _x + " Karten gegeben";
-        UIManager.Instance.SetBubbleLeft(true);
+        UIManager.Instance.SetBubbleRight(true);
         UIManager.Instance.bubbleTextRight.text = cardText_;
     }
 }
