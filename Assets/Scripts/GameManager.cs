@@ -518,8 +518,7 @@ public class GameManager : NetworkBehaviour
     [ServerRpc]
     public void DisplayBubbleRightServerRpc(int _x)
     {
-        UIManager.Instance.SetBubbleLeft(true);
-        UIManager.Instance.bubbleTextLeft.text = cardText_;
+       
         DisplayBubbleRightClientRpc(_x);
     }
 
@@ -548,6 +547,7 @@ public class GameManager : NetworkBehaviour
     {
         string cardText_ = string.Empty;
         cardText_ = _x + " Karten gegeben";
+        UIManager.Instance.SetBubbleLeft(true);
         UIManager.Instance.bubbleTextRight.text = cardText_;
     }
 }
