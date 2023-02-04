@@ -61,6 +61,7 @@ public class Card : MonoBehaviour
     {
         transform.position = oGPos;
         isSelected = false;
+        cardOwner.selectedCards.Remove(this);
     }
 }
 

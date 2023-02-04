@@ -84,10 +84,7 @@ public class GameManager : NetworkBehaviour
         {
             return State.PreGame;
         } 
-        if(state == State.StealingVize)
-        {
-
-        }
+ 
         return _newState;
     }
 
@@ -97,6 +94,7 @@ public class GameManager : NetworkBehaviour
         ChangeStateClientRpc();
         if (state == State.StealingVize)
         {
+            currentPlayerId.Value = placements[2];
             GetPlayerById(placements[2]).ExchangeCardsClientRpc(TargetId(placements[2]));
         }
     }
@@ -294,11 +292,11 @@ public class GameManager : NetworkBehaviour
         ResetLastPlayed();
         InitShuffleServerRpc();
         GetPlayerById(currentPlayerId.Value).DealCards();
-        SetFirstPlayerServerRpc();
+        //SetFirstPlayerServerRpc();
         ChangeStateServerRpc();
-
         if (state == State.Stealing)
         {
+            currentPlayerId.Value = placements[1];
             GetPlayerById(placements[1]).ExchangeCardsClientRpc(TargetId(placements[1]));
         }
      
@@ -507,7 +505,7 @@ public class GameManager : NetworkBehaviour
         {
             player.RemoveSelectedCardsClientRpc();
         }
-
+        SetFirstPlayerServerRpc();
         ResetPlacementsServerRpc();
         cardsExchanged.Value = -1;
         ChangeStateServerRpc();
