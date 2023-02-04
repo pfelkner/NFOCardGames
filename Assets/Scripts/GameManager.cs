@@ -509,6 +509,7 @@ public class GameManager : NetworkBehaviour
         ResetPlacementsServerRpc();
         cardsExchanged.Value = -1;
         UIManager.Instance.SetBubbleRight(false);
+        UIManager.Instance.SetBubbleLeft(false);
         ChangeStateServerRpc();
 
     }
