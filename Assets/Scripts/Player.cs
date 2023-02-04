@@ -4,6 +4,7 @@ using UnityEngine;
 using static GameManager;
 using System.Linq;
 using System;
+using System.Runtime.InteropServices;
 
 public class Player : NetworkBehaviour
 {
@@ -206,7 +207,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.ChangeStateServerRpc();
         GameManager.gM.ChangeStateServerRpc();
         UIManager.Instance.ReturnMode();
-       
+        GameManager.gM.DisplayBubbleRightServerRpc(0);
         GameManager.gM.PreGame();
     }
 
@@ -216,6 +217,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 2;
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
         GameManager.gM.ChangeStateServerRpc();
+        GameManager.gM.DisplayBubbleRightServerRpc(2);
         UIManager.Instance.ReturnMode();
 
     }
@@ -225,6 +227,7 @@ public class Player : NetworkBehaviour
         GameManager.gM.cardsExchanged.Value = 1;
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, GameManager.gM.TargetId(_senderId));
         GameManager.gM.ChangeStateServerRpc();
+        GameManager.gM.DisplayBubbleRightServerRpc(1);
         UIManager.Instance.ReturnMode();
     }
 
@@ -244,7 +247,6 @@ public class Player : NetworkBehaviour
         Debug.Log("HandleReturncArdsServer2" + GameManager.gM.state);
         GameManager.gM.cardsExchanged.Value = 2;
         GetPlayerById(_senderId).AddToHandClientRpc(_newCardOne, _newCardTwo, GameManager.gM.TargetId(_senderId));
-
         GameManager.gM.ChangeStateServerRpc();
         if (GameManager.gM.state == State.PreGame)
         {
@@ -534,4 +536,7 @@ public class Player : NetworkBehaviour
         else
             return new List<Card>();
     }
+
+
+ 
 }

@@ -32,6 +32,12 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI codeText;
     public GameObject codePanel;
 
+    public GameObject bubbleImageLeft;
+    public TextMeshProUGUI bubbleTextLeft;
+
+    public GameObject bubbleImageRight;
+    public TextMeshProUGUI bubbleTextRight;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -105,6 +111,15 @@ public class UIManager : MonoBehaviour
     public void SetCodeText(string _code)
     {
         codeText.text = _code;
+    }
+
+    public void SetBubbleLeft(bool _flag)
+    {
+        bubbleImageLeft.SetActive(_flag);
+    }
+    public void SetBubbleRight(bool _flag)
+    {
+        bubbleImageRight.SetActive(_flag);
     }
 
 

@@ -510,6 +510,46 @@ public class GameManager : NetworkBehaviour
         cardsExchanged.Value = -1;
         ChangeStateServerRpc();
     }
+    [ServerRpc]
+    public void DisplayRequestedCardsServerRpc(int _x, int _y)
+    {
+        DisplayBubbleLeftClientRpc(_x,_y);
+    }
+    [ServerRpc]
+    public void DisplayBubbleRightServerRpc(int _x)
+    {
+        UIManager.Instance.SetBubbleLeft(true);
+        UIManager.Instance.bubbleTextLeft.text = cardText_;
+        DisplayBubbleRightClientRpc(_x);
+    }
+
+    [ClientRpc]
+    public void DisplayBubbleLeftClientRpc(int _x, int _y)
+    {
+        string cardText_ = string.Empty;
+        if (_x == -1  && _y == -1)
+        {
+            cardText_ = "Ich will keine Karte du Arschloch!";
+        } 
+        else if(_x != -1 && _y == -1)
+        {
+            cardText_ = "Gib "+(Values)_x;
+        }
+        else if (_x != -1 && _y != -1)
+        {
+            cardText_ = "Gib " + (Values)_x+ " , " + (Values)_y; 
+        }
+        UIManager.Instance.SetBubbleLeft(true);
+        UIManager.Instance.bubbleTextLeft.text = cardText_;
+
+    }
+    [ClientRpc]
+    public void DisplayBubbleRightClientRpc(int _x)
+    {
+        string cardText_ = string.Empty;
+        cardText_ = _x + " Karten gegeben";
+        UIManager.Instance.bubbleTextRight.text = cardText_;
+    }
 }
 
 

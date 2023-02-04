@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ExChangeCards : MonoBehaviour
 {
@@ -97,8 +98,17 @@ public class ExChangeCards : MonoBehaviour
         List<Values> vals_ = new List<Values>();
         cardsToSteal.ForEach(c => vals_.Add(c.value));
         GameManager.gM.GetCards(vals_);
+        if (cardsToSteal.Count == 2)
+        {
+            GameManager.gM.DisplayRequestedCardsServerRpc((int)cardsToSteal[0].value, (int)cardsToSteal[1].value);
+        } else if(cardsToSteal.Count == 1)
+        {
+            GameManager.gM.DisplayRequestedCardsServerRpc((int)cardsToSteal[0].value, -1);
+        } else if(cardsToSteal.Count == 0)
+        {
+
+        }
         ResetSelection();
-       
     }
     public void ReturnCards()
     {
@@ -106,6 +116,7 @@ public class ExChangeCards : MonoBehaviour
         cardsToReturn = GameManager.gM.GetLocalPlayer().GetSelectedCards();
         cardsToReturn.ForEach(c => vals_.Add(c.value));
         GameManager.gM.ReturnCards(vals_);
+        string text_ = "Hier" + cardsToReturn.Count;
     }
 
     public void Deactivate()
