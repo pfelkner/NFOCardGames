@@ -508,14 +508,16 @@ public class GameManager : NetworkBehaviour
         SetFirstPlayerServerRpc();
         ResetPlacementsServerRpc();
         cardsExchanged.Value = -1;
+        UIManager.Instance.SetBubbleRight(false);
         ChangeStateServerRpc();
+
     }
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void DisplayRequestedCardsServerRpc(int _x, int _y)
     {
         DisplayBubbleLeftClientRpc(_x,_y);
     }
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void DisplayBubbleRightServerRpc(int _x)
     {
        
