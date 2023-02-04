@@ -503,6 +503,11 @@ public class GameManager : NetworkBehaviour
 
     public void PreGame()
     {
+        foreach(Player player in players)
+        {
+            player.RemoveSelectedCardsClientRpc();
+        }
+
         ResetPlacementsServerRpc();
         cardsExchanged.Value = -1;
         ChangeStateServerRpc();

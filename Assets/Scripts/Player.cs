@@ -406,6 +406,12 @@ public class Player : NetworkBehaviour
         selectedCards.ForEach(card => HandlePlayerCard(card));
         selectedCards.Clear();
     }
+    [ClientRpc]
+    public void RemoveSelectedCardsClientRpc()
+    {
+        selectedCards.ForEach(card => HandlePlayerCard(card));
+        selectedCards.Clear();
+    }
 
     private void PassTurn()
     {
