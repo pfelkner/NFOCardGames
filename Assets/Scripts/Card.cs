@@ -74,6 +74,7 @@ public enum Colors
 }
 public enum Values
 {
+    sechs,
     sieben,
     acht,
     neun,

@@ -6600,6 +6600,7 @@ MonoBehaviour:
   - {fileID: -877941045, guid: d4250a8d1a3210f4395d996b816353ad, type: 3}
   - {fileID: 1985841515, guid: d4250a8d1a3210f4395d996b816353ad, type: 3}
   valueSprites:
+  - {fileID: -2017352142, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: 834165633, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: -1841860372, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: 1203620744, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
@@ -9109,7 +9110,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: valuesAvaliable.Array.size
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: lastCardPlayed.Array.data[0]
@@ -9150,6 +9151,10 @@ PrefabInstance:
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: valuesAvaliable.Array.data[7]
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
+      propertyPath: valuesAvaliable.Array.data[8]
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8714726494607108089, guid: 99aeda4bb420410418f078a55572a17a, type: 3}
       propertyPath: lastCardPlayedValue.m_InternalValue
