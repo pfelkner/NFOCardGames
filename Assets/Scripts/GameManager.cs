@@ -540,6 +540,7 @@ public class GameManager : NetworkBehaviour
         {
             cardText_ = "Gib " + (Values)_x+ " , " + (Values)_y; 
         }
+        Debug.LogWarning("int: "+ _x +"value" +(Values)_x);
         UIManager.Instance.SetBubbleLeft(true);
         UIManager.Instance.bubbleTextLeft.text = cardText_;
 

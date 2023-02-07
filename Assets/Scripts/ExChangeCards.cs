@@ -23,32 +23,6 @@ public class ExChangeCards : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
-    public void Update()
-    {
-        //if ((GameManager.gM.state == State.Stealing || GameManager.gM.state == State.Returning))
-        //{
-        //    RectTransform trans_ = gameObject.GetComponent<RectTransform>();
-        //    trans_.anchoredPosition = new Vector2(-12, 31);
-        //}
-        //if (GameManager.gM.state == State.StealingVize || GameManager.gM.state == State.ReturningVize)
-        //{
-        //    RectTransform trans_ = gameObject.GetComponent<RectTransform>();
-        //    trans_.anchoredPosition = new Vector2(-12, 31);
-        //}
-        //else
-        //{
-        //    RectTransform trans_ = gameObject.GetComponent<RectTransform>();
-        //    trans_.anchoredPosition = new Vector2(-600, -600);
-        //}
-
-    }
-
-
-    //public void SetButtons(bool _flag)
-    //{
-    //    addBtn.SetActive(_flag);
-    //    removeBtn.SetActive(_flag);
-    //}
 
     public void SetPosition()
     {
