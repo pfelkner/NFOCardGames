@@ -73,6 +73,8 @@ public class Player : NetworkBehaviour
         {
             ExChangeCards.Instance.gameObject.SetActive(false);
             ExChangeCards.Instance.SetPosition2();
+            UIManager.Instance.SetBubbleRight(false);
+            UIManager.Instance.SetBubbleLeft(false);
         } else
         {
             ExChangeCards.Instance.SetPosition();
