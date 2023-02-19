@@ -6601,7 +6601,7 @@ MonoBehaviour:
   - {fileID: 1985841515, guid: d4250a8d1a3210f4395d996b816353ad, type: 3}
   valueSprites:
   - {fileID: -2017352142, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
-  - {fileID: 834165633, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
+  - {fileID: -2017352142, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: -1841860372, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: 1203620744, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
   - {fileID: -326530114, guid: 60ebaaedac8fcc54b8505159729e2faa, type: 3}
